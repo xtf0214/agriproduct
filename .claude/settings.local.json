@@ -5,7 +5,12 @@
       "Bash(echo:*)",
       "Bash(where:*)",
       "Bash(mvn clean compile:*)",
-      "Bash(mvn clean install:*)"
+      "Bash(mvn clean install:*)",
+      "Bash(sc query:*)",
+      "Bash(findstr:*)",
+      "Bash(mysql:*)",
+      "Bash(taskkill:*)",
+      "Bash(mvn spring-boot:run:*)"
     ]
   }
 }
