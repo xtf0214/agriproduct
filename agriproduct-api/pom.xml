@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.agriproduct</groupId>
+        <artifactId>agriproduct</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>agriproduct-api</artifactId>
+    <packaging>pom</packaging>
+    <name>agriproduct-api</name>
+    <description>API接口定义模块</description>
+
+    <modules>
+        <module>agriproduct-api-user</module>
+        <module>agriproduct-api-product</module>
+        <module>agriproduct-api-order</module>
+        <module>agriproduct-api-merchant</module>
+    </modules>
+
+    <dependencies>
+        <!-- 公共核心模块 -->
+        <dependency>
+            <groupId>com.agriproduct</groupId>
+            <artifactId>agriproduct-common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>
