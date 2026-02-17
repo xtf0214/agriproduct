@@ -10,7 +10,12 @@
       "Bash(findstr:*)",
       "Bash(mysql:*)",
       "Bash(taskkill:*)",
-      "Bash(mvn spring-boot:run:*)"
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(mvn test:*)",
+      "Bash(mvn compile:*)",
+      "Bash(mvn clean:*)",
+      "Bash(mvn install:*)",
+      "Bash(mvn -pl agriproduct-admin -am spring-boot:run:*)"
     ]
   }
 }

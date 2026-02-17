@@ -17,7 +17,7 @@ public class MyBatisPlusConfig {
     /**
      * 分页插件
      */
-    @Bean
+    @Bean("userMybatisPlusInterceptor")
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
