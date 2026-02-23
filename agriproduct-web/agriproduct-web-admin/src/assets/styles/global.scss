@@ -1,0 +1,56 @@
+@use './reset.scss';
+@use './variables.scss' as *;
+
+.page-container {
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+.page-header {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid $border-light;
+
+  .page-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: $text-primary;
+  }
+}
+
+.search-form {
+  margin-bottom: 20px;
+  padding: 20px;
+  background-color: $bg-color;
+  border-radius: 4px;
+}
+
+.pagination-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.status-tag {
+  &.success {
+    background-color: #f0f9ff;
+    color: #67c23a;
+  }
+
+  &.warning {
+    background-color: #fdf6ec;
+    color: #e6a23c;
+  }
+
+  &.danger {
+    background-color: #fef0f0;
+    color: #f56c6c;
+  }
+
+  &.info {
+    background-color: #f4f4f5;
+    color: #909399;
+  }
+}

@@ -1,0 +1,6 @@
+export { default as request, get, post, put, del } from '@/utils/request'
+export { loginApi, registerApi } from './auth'
+export { getUserListApi, updateUserStatusApi } from './user'
+export { getMerchantListApi, auditMerchantApi } from './merchant'
+export { getAuditProductListApi, auditProductApi } from './product'
+export { getBannerListApi, addBannerApi, updateBannerApi, deleteBannerApi } from './banner'
