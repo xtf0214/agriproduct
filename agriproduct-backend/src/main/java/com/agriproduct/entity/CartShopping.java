@@ -20,13 +20,25 @@ public class CartShopping {
 
     private Long productId;
 
+    private Integer quantity;
+
+    /**
+     * 商品名称（非数据库字段，运行时从商品表获取）
+     */
+    @TableField(exist = false)
     private String productName;
 
+    /**
+     * 商品图片（非数据库字段，运行时从商品表获取）
+     */
+    @TableField(exist = false)
     private String productImage;
 
+    /**
+     * 商品价格（非数据库字段，运行时从商品表获取）
+     */
+    @TableField(exist = false)
     private BigDecimal productPrice;
-
-    private Integer quantity;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;

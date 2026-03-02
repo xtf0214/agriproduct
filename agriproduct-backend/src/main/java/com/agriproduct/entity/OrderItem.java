@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 订单商品明细实体
@@ -28,4 +29,7 @@ public class OrderItem {
     private Integer quantity;
 
     private BigDecimal totalAmount;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 }

@@ -16,7 +16,7 @@ public interface OrderService extends IService<OrderOrder> {
 
     OrderVO getOrderDetail(Long orderId);
 
-    IPage<OrderVO> getUserOrders(Page<OrderOrder> page, Long userId);
+    IPage<OrderVO> getUserOrders(Page<OrderOrder> page, Long userId, Integer status);
 
     IPage<OrderVO> getMerchantOrders(Page<OrderOrder> page, Long merchantId);
 

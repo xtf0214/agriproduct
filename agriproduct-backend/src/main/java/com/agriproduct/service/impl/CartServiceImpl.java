@@ -63,16 +63,12 @@ public class CartServiceImpl extends ServiceImpl<CartShoppingMapper, CartShoppin
                 throw new BusinessException("库存不足");
             }
             existCart.setQuantity(newQuantity);
-            existCart.setProductPrice(product.getPrice());
             updateById(existCart);
         } else {
             CartShopping cart = new CartShopping();
             cart.setUserId(userId);
             cart.setProductId(request.getProductId());
             cart.setQuantity(request.getQuantity());
-            cart.setProductName(product.getName());
-            cart.setProductImage(product.getMainImage());
-            cart.setProductPrice(product.getPrice());
             save(cart);
         }
     }
@@ -118,9 +114,18 @@ public class CartServiceImpl extends ServiceImpl<CartShoppingMapper, CartShoppin
 
     private CartVO convertToVO(CartShopping cart) {
         CartVO vo = BeanUtil.copyProperties(cart, CartVO.class);
-        if (cart.getProductPrice() != null && cart.getQuantity() != null) {
-            vo.setTotalPrice(cart.getProductPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
+        
+        // 从商品表获取最新信息
+        ProdProduct product = productMapper.selectById(cart.getProductId());
+        if (product != null) {
+            vo.setProductName(product.getName());
+            vo.setProductImage(product.getMainImage());
+            vo.setProductPrice(product.getPrice());
+            if (product.getPrice() != null && cart.getQuantity() != null) {
+                vo.setTotalPrice(product.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
+            }
         }
+        
         vo.setSelected(false);
         return vo;
     }

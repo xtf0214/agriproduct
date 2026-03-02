@@ -43,10 +43,11 @@ public class OrderController {
     @GetMapping("/list")
     public Result<IPage<OrderVO>> getUserOrders(
             @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) Integer status,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         Page<OrderOrder> page = new Page<>(pageNum, pageSize);
-        IPage<OrderVO> result = orderService.getUserOrders(page, userId);
+        IPage<OrderVO> result = orderService.getUserOrders(page, userId, status);
         return Result.success(result);
     }
 

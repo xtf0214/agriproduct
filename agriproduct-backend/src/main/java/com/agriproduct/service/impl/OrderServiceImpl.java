@@ -40,10 +40,47 @@ public class OrderServiceImpl extends ServiceImpl<OrderOrderMapper, OrderOrder> 
             throw new BusinessException("收货地址不存在");
         }
 
+        // 从购物车创建订单
+        if (request.getCartIds() == null || request.getCartIds().isEmpty()) {
+            throw new BusinessException("请选择要购买的商品");
+        }
+        
+        List<CartShopping> carts = cartMapper.selectBatchIds(request.getCartIds());
+        Long merchantId = null;
         BigDecimal totalAmount = BigDecimal.ZERO;
+        
+        // 第一轮遍历：验证商品并计算总金额
+        for (CartShopping cart : carts) {
+            if (!userId.equals(cart.getUserId())) {
+                throw new BusinessException("购物车数据异常");
+            }
+            
+            ProdProduct product = productMapper.selectById(cart.getProductId());
+            if (product == null) {
+                throw new BusinessException("商品不存在");
+            }
+            if (product.getStatus() != 1) {
+                throw new BusinessException("商品[" + product.getName() + "]已下架");
+            }
+            if (product.getStock() < cart.getQuantity()) {
+                throw new BusinessException("商品[" + product.getName() + "]库存不足");
+            }
+            
+            if (merchantId == null) {
+                merchantId = product.getMerchantId();
+            }
+            
+            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity()));
+            totalAmount = totalAmount.add(itemTotal);
+        }
+        
+        // 创建并保存订单
         OrderOrder order = new OrderOrder();
         order.setOrderNo(generateOrderNo());
         order.setUserId(userId);
+        order.setMerchantId(merchantId);
+        order.setTotalAmount(totalAmount);
+        order.setPayAmount(totalAmount);
         order.setStatus(1);
         order.setPayStatus(0);
         order.setReceiverName(address.getReceiverName());
@@ -51,54 +88,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderOrderMapper, OrderOrder> 
         order.setReceiverAddress(address.getProvince() + address.getCity() + 
                 address.getDistrict() + address.getDetailAddress());
         order.setRemark(request.getRemark());
-
-        // 从购物车创建订单
-        if (request.getCartIds() != null && !request.getCartIds().isEmpty()) {
-            List<CartShopping> carts = cartMapper.selectBatchIds(request.getCartIds());
-            Long merchantId = null;
-            
-            for (CartShopping cart : carts) {
-                if (!userId.equals(cart.getUserId())) {
-                    throw new BusinessException("购物车数据异常");
-                }
-                
-                ProdProduct product = productMapper.selectById(cart.getProductId());
-                if (product == null || product.getStatus() != 1) {
-                    throw new BusinessException("商品[" + cart.getProductName() + "]不存在或已下架");
-                }
-                if (product.getStock() < cart.getQuantity()) {
-                    throw new BusinessException("商品[" + product.getName() + "]库存不足");
-                }
-                
-                if (merchantId == null) {
-                    merchantId = product.getMerchantId();
-                }
-                
-                BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity()));
-                totalAmount = totalAmount.add(itemTotal);
-
-                OrderItem item = new OrderItem();
-                item.setOrderId(order.getId());
-                item.setProductId(product.getId());
-                item.setProductName(product.getName());
-                item.setProductImage(product.getMainImage());
-                item.setPrice(product.getPrice());
-                item.setQuantity(cart.getQuantity());
-                item.setTotalAmount(itemTotal);
-                orderItemMapper.insert(item);
-
-                product.setStock(product.getStock() - cart.getQuantity());
-                product.setSales(product.getSales() + cart.getQuantity());
-                productMapper.updateById(product);
-            }
-            
-            order.setMerchantId(merchantId);
-            cartMapper.deleteBatchIds(request.getCartIds());
-        }
-
-        order.setTotalAmount(totalAmount);
-        order.setPayAmount(totalAmount);
         save(order);
+        
+        // 第二轮遍历：创建订单项并更新库存
+        for (CartShopping cart : carts) {
+            ProdProduct product = productMapper.selectById(cart.getProductId());
+            
+            BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity()));
+            
+            OrderItem item = new OrderItem();
+            item.setOrderId(order.getId());
+            item.setProductId(product.getId());
+            item.setProductName(product.getName());
+            item.setProductImage(product.getMainImage());
+            item.setPrice(product.getPrice());
+            item.setQuantity(cart.getQuantity());
+            item.setTotalAmount(itemTotal);
+            orderItemMapper.insert(item);
+
+            product.setStock(product.getStock() - cart.getQuantity());
+            product.setSales(product.getSales() + cart.getQuantity());
+            productMapper.updateById(product);
+        }
+        
+        cartMapper.deleteBatchIds(request.getCartIds());
 
         return getOrderDetail(order.getId());
     }
@@ -118,13 +131,17 @@ public class OrderServiceImpl extends ServiceImpl<OrderOrderMapper, OrderOrder> 
     }
 
     @Override
-    public IPage<OrderVO> getUserOrders(Page<OrderOrder> page, Long userId) {
-        IPage<OrderOrder> orderPage = page(
-                page,
-                new LambdaQueryWrapper<OrderOrder>()
-                        .eq(OrderOrder::getUserId, userId)
-                        .orderByDesc(OrderOrder::getCreateTime)
-        );
+    public IPage<OrderVO> getUserOrders(Page<OrderOrder> page, Long userId, Integer status) {
+        LambdaQueryWrapper<OrderOrder> wrapper = new LambdaQueryWrapper<OrderOrder>()
+                .eq(OrderOrder::getUserId, userId);
+        
+        if (status != null) {
+            wrapper.eq(OrderOrder::getStatus, status);
+        }
+        
+        wrapper.orderByDesc(OrderOrder::getCreateTime);
+        
+        IPage<OrderOrder> orderPage = page(page, wrapper);
 
         List<OrderVO> voList = orderPage.getRecords().stream()
                 .map(order -> {
