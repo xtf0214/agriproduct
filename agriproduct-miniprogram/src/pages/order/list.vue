@@ -116,7 +116,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
-import { getOrderList, cancelOrder, confirmReceive } from '@/api/order'
+import { getOrderList, cancelOrder, confirmReceive, payOrder } from '@/api/order'
 import { useUserStore } from '@/stores/user'
 import EmptyState from '@/components/EmptyState.vue'
 import LoadMore from '@/components/LoadMore.vue'
@@ -263,8 +263,25 @@ function handleReceive(orderId: number) {
 
 // 去付款
 function handlePay(orderId: number) {
-  // 这里可以跳转到支付页面或调用支付接口
-  uni.showToast({ title: '支付功能待实现', icon: 'none' })
+  const order = orders.value.find(o => o.id === orderId)
+  uni.showModal({
+    title: '确认支付',
+    content: `确定支付 ¥${order?.totalAmount.toFixed(2)} 吗？`,
+    success: async (res) => {
+      if (res.confirm) {
+        try {
+          uni.showLoading({ title: '支付中...' })
+          await payOrder(orderId)
+          uni.hideLoading()
+          uni.showToast({ title: '支付成功', icon: 'success' })
+          fetchOrders(true)
+        } catch (e) {
+          uni.hideLoading()
+          uni.showToast({ title: '支付失败', icon: 'none' })
+        }
+      }
+    }
+  })
 }
 
 // 跳转详情

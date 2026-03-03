@@ -10,7 +10,10 @@ import com.agriproduct.entity.Merchant;
 import com.agriproduct.entity.ProdProduct;
 import com.agriproduct.entity.SysUser;
 import com.agriproduct.service.AdminService;
+import com.agriproduct.vo.AdminStatisticsOverviewVO;
 import com.agriproduct.vo.BannerVO;
+import com.agriproduct.vo.CategorySalesVO;
+import com.agriproduct.vo.DailyOrderStatisticsVO;
 import com.agriproduct.vo.MerchantVO;
 import com.agriproduct.vo.ProductVO;
 import com.agriproduct.vo.UserInfoVO;
@@ -19,7 +22,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * 管理后台控制器
@@ -124,5 +131,30 @@ public class AdminController {
     public Result<Boolean> deleteBanner(@PathVariable Long id) {
         Boolean result = adminService.deleteBanner(id);
         return Result.success(result);
+    }
+
+    // ========== 统计数据 ==========
+
+    @Operation(summary = "获取统计概览")
+    @GetMapping("/statistics/overview")
+    public Result<AdminStatisticsOverviewVO> getStatisticsOverview() {
+        AdminStatisticsOverviewVO overview = adminService.getStatisticsOverview();
+        return Result.success(overview);
+    }
+
+    @Operation(summary = "获取每日订单统计")
+    @GetMapping("/statistics/orders/daily")
+    public Result<List<DailyOrderStatisticsVO>> getDailyOrderStatistics(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+        List<DailyOrderStatisticsVO> statistics = adminService.getDailyOrderStatistics(startDate, endDate);
+        return Result.success(statistics);
+    }
+
+    @Operation(summary = "获取分类销售统计")
+    @GetMapping("/statistics/category")
+    public Result<List<CategorySalesVO>> getCategorySales() {
+        List<CategorySalesVO> statistics = adminService.getCategorySales();
+        return Result.success(statistics);
     }
 }

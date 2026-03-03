@@ -1,7 +1,7 @@
 import { get, put } from './index'
 
 export interface UserItem {
-  userId: number
+  id: number
   username: string
   nickname: string
   phone: string

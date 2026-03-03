@@ -12,6 +12,9 @@ export const getOrderDetail = (id: number) => {
 }
 
 // 订单发货
-export const shipOrder = (orderId: number) => {
-  return request.put<ApiResponse<void>>(`/api/merchant/order/${orderId}/ship`)
+export const shipOrder = (orderId: number, expressCompany?: string, expressNo?: string) => {
+  return request.put<ApiResponse<void>>(`/api/merchant/order/${orderId}/ship`, {
+    expressCompany,
+    expressNo
+  })
 }

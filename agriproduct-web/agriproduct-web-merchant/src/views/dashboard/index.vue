@@ -108,9 +108,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getStatisticsOverview, getProductSalesRank } from '@/api/statistics'
+import * as echarts from 'echarts'
+import { getStatisticsOverview, getProductSalesRank, getSalesStatistics } from '@/api/statistics'
 import { getOrderList, shipOrder } from '@/api/order'
 import { orderStatusText, orderStatusType } from '@/utils/format'
 import type { StatisticsOverview, ProductSales, Order } from '@/types/api'
@@ -140,6 +141,7 @@ const pendingOrders = ref<Order[]>([])
 const orderLoading = ref(false)
 
 const chartRef = ref<HTMLElement>()
+let chartInstance: echarts.ECharts | null = null
 
 // 获取统计概览
 const fetchOverview = async () => {
@@ -206,10 +208,146 @@ const handleShip = (order: Order) => {
   }).catch(() => {})
 }
 
+// 初始化销售趋势图表
+const initChart = async () => {
+  chartLoading.value = true
+  try {
+    // 获取最近7天的日期范围
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - 6)
+    
+    const formatDate = (date: Date) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+    
+    const res = await getSalesStatistics(formatDate(startDate), formatDate(endDate))
+    
+    await nextTick()
+    
+    if (chartRef.value) {
+      chartInstance = echarts.init(chartRef.value)
+      
+      const dates: string[] = []
+      const amounts: number[] = []
+      const counts: number[] = []
+      
+      // 生成最近7天的日期
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date()
+        date.setDate(date.getDate() - i)
+        dates.push(formatDate(date).slice(5)) // 只显示月-日
+      }
+      
+      // 填充数据
+      if (res.data) {
+        const dataMap = new Map(res.data.map(item => [item.date, item]))
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date()
+          date.setDate(date.getDate() - i)
+          const dateStr = formatDate(date)
+          const item = dataMap.get(dateStr)
+          amounts.push(item?.amount || 0)
+          counts.push(item?.count || 0)
+        }
+      }
+      
+      const option: echarts.EChartsOption = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross'
+          }
+        },
+        legend: {
+          data: ['销售额', '订单数']
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: dates
+        },
+        yAxis: [
+          {
+            type: 'value',
+            name: '销售额(元)',
+            position: 'left',
+            axisLabel: {
+              formatter: '{value}'
+            }
+          },
+          {
+            type: 'value',
+            name: '订单数',
+            position: 'right',
+            axisLabel: {
+              formatter: '{value}'
+            }
+          }
+        ],
+        series: [
+          {
+            name: '销售额',
+            type: 'line',
+            smooth: true,
+            data: amounts,
+            itemStyle: {
+              color: '#409EFF'
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(64, 158, 255, 0.3)' },
+                { offset: 1, color: 'rgba(64, 158, 255, 0.05)' }
+              ])
+            }
+          },
+          {
+            name: '订单数',
+            type: 'bar',
+            yAxisIndex: 1,
+            data: counts,
+            itemStyle: {
+              color: '#67C23A',
+              borderRadius: [4, 4, 0, 0]
+            }
+          }
+        ]
+      }
+      
+      chartInstance.setOption(option)
+    }
+  } catch (error) {
+    console.error(error)
+  } finally {
+    chartLoading.value = false
+  }
+}
+
+// 窗口大小变化时重新调整图表
+const handleResize = () => {
+  chartInstance?.resize()
+}
+
 onMounted(() => {
   fetchOverview()
   fetchProductRank()
   fetchPendingOrders()
+  initChart()
+  window.addEventListener('resize', handleResize)
+})
+
+onUnmounted(() => {
+  chartInstance?.dispose()
+  window.removeEventListener('resize', handleResize)
 })
 </script>
 

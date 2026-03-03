@@ -25,4 +25,6 @@ public interface OrderService extends IService<OrderOrder> {
     void confirmOrder(Long orderId, Long userId);
 
     void shipOrder(Long orderId, Long merchantId);
+
+    void payOrder(Long orderId, Long userId);
 }

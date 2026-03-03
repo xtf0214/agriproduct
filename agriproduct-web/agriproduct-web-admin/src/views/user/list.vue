@@ -34,7 +34,7 @@
     </div>
 
     <el-table v-loading="loading" :data="userList" style="width: 100%">
-      <el-table-column prop="userId" label="ID" width="80" />
+      <el-table-column prop="id" label="ID" width="80" />
       <el-table-column label="头像" width="80">
         <template #default="{ row }">
           <el-avatar :size="40" :src="row.avatar">
@@ -142,7 +142,7 @@ async function handleUpdateStatus(row: UserItem, status: number) {
       type: 'warning'
     })
 
-    const res = await updateUserStatusApi(row.userId, status)
+    const res = await updateUserStatusApi(row.id, status)
     if (res.code === 200) {
       ElMessage.success(`${text}成功`)
       getList()

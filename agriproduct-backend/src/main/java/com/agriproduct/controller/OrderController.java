@@ -66,4 +66,12 @@ public class OrderController {
         orderService.confirmOrder(orderId, userId);
         return Result.success();
     }
+
+    @Operation(summary = "支付订单(模拟)")
+    @PutMapping("/{orderId}/pay")
+    public Result<Void> payOrder(@PathVariable Long orderId,
+                                  @RequestHeader("X-User-Id") Long userId) {
+        orderService.payOrder(orderId, userId);
+        return Result.success();
+    }
 }

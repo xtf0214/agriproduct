@@ -217,6 +217,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderOrderMapper, OrderOrder> 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public void payOrder(Long orderId, Long userId) {
+        OrderOrder order = getById(orderId);
+        if (order == null) {
+            throw new BusinessException("订单不存在");
+        }
+        if (!userId.equals(order.getUserId())) {
+            throw new BusinessException("无权操作此订单");
+        }
+        if (order.getStatus() != 1) {
+            throw new BusinessException("只有待付款订单才能支付");
+        }
+        order.setStatus(2);
+        order.setPayStatus(1);
+        order.setPayTime(LocalDateTime.now());
+        updateById(order);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void shipOrder(Long orderId, Long merchantId) {
         OrderOrder order = getById(orderId);
         if (order == null) {

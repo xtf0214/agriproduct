@@ -25,3 +25,8 @@ export function cancelOrder(orderId: number | string) {
 export function confirmReceive(orderId: number | string) {
   return put(`/api/order/${orderId}/confirm`)
 }
+
+// 支付订单（模拟）
+export function payOrder(orderId: number | string) {
+  return put(`/api/order/${orderId}/pay`)
+}

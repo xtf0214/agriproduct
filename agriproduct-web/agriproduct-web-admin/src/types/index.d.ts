@@ -10,3 +10,10 @@ export interface TableResponse<T> {
   current: number
   size: number
 }
+
+// API响应通用类型
+export interface ApiResponse<T = any> {
+  code: number
+  message: string
+  data: T
+}

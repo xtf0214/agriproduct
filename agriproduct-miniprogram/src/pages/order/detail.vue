@@ -107,7 +107,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
-import { getOrderDetail, cancelOrder, confirmReceive } from '@/api/order'
+import { getOrderDetail, cancelOrder, confirmReceive, payOrder } from '@/api/order'
 import type { Order, OrderStatus } from '@/types'
 
 const orderId = ref('')
@@ -200,7 +200,24 @@ function handleReceive() {
 
 // 去付款
 function handlePay() {
-  uni.showToast({ title: '支付功能待实现', icon: 'none' })
+  uni.showModal({
+    title: '确认支付',
+    content: `确定支付 ¥${order.value?.totalAmount.toFixed(2)} 吗？`,
+    success: async (res) => {
+      if (res.confirm && order.value) {
+        try {
+          uni.showLoading({ title: '支付中...' })
+          await payOrder(order.value.id)
+          uni.hideLoading()
+          uni.showToast({ title: '支付成功', icon: 'success' })
+          fetchOrderDetail()
+        } catch (e) {
+          uni.hideLoading()
+          uni.showToast({ title: '支付失败', icon: 'none' })
+        }
+      }
+    }
+  })
 }
 
 onLoad((options) => {

@@ -18,6 +18,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +36,9 @@ public class AdminServiceImpl implements AdminService {
     private final MerchantMapper merchantMapper;
     private final ProdProductMapper productMapper;
     private final ContentBannerMapper bannerMapper;
+    private final OrderOrderMapper orderMapper;
+    private final ProdCategoryMapper categoryMapper;
+    private final OrderItemMapper orderItemMapper;
 
     // ========== 用户管理 ==========
 
@@ -199,5 +210,116 @@ public class AdminServiceImpl implements AdminService {
 
     private BannerVO convertBannerToVO(ContentBanner banner) {
         return BeanUtil.copyProperties(banner, BannerVO.class);
+    }
+
+    // ========== 统计数据 ==========
+
+    @Override
+    public AdminStatisticsOverviewVO getStatisticsOverview() {
+        AdminStatisticsOverviewVO overview = new AdminStatisticsOverviewVO();
+        
+        // 用户总数
+        Long totalUsers = userMapper.selectCount(
+                new LambdaQueryWrapper<SysUser>().eq(SysUser::getUserType, 1));
+        overview.setTotalUsers(totalUsers);
+        
+        // 商家总数
+        Long totalMerchants = merchantMapper.selectCount(
+                new LambdaQueryWrapper<Merchant>().eq(Merchant::getStatus, 1));
+        overview.setTotalMerchants(totalMerchants);
+        
+        // 商品总数
+        Long totalProducts = productMapper.selectCount(
+                new LambdaQueryWrapper<ProdProduct>().eq(ProdProduct::getStatus, 1));
+        overview.setTotalProducts(totalProducts);
+        
+        // 订单总数
+        Long totalOrders = orderMapper.selectCount(null);
+        overview.setTotalOrders(totalOrders);
+        
+        return overview;
+    }
+
+    @Override
+    public List<DailyOrderStatisticsVO> getDailyOrderStatistics(LocalDate startDate, LocalDate endDate) {
+        List<DailyOrderStatisticsVO> result = new ArrayList<>();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        
+        // 获取日期范围内的订单
+        LambdaQueryWrapper<OrderOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.ge(OrderOrder::getCreateTime, startDate.atStartOfDay())
+                .le(OrderOrder::getCreateTime, endDate.atTime(LocalTime.MAX))
+                .eq(OrderOrder::getPayStatus, 1);
+        
+        List<OrderOrder> orders = orderMapper.selectList(wrapper);
+        
+        // 按日期分组统计
+        Map<String, List<OrderOrder>> ordersByDate = orders.stream()
+                .collect(Collectors.groupingBy(
+                        order -> order.getCreateTime().format(formatter)
+                ));
+        
+        // 填充每一天的数据
+        LocalDate current = startDate;
+        while (!current.isAfter(endDate)) {
+            String dateStr = current.format(formatter);
+            List<OrderOrder> dayOrders = ordersByDate.getOrDefault(dateStr, new ArrayList<>());
+            
+            long count = dayOrders.size();
+            BigDecimal amount = dayOrders.stream()
+                    .map(OrderOrder::getPayAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            
+            result.add(new DailyOrderStatisticsVO(dateStr, count, amount));
+            current = current.plusDays(1);
+        }
+        
+        return result;
+    }
+
+    @Override
+    public List<CategorySalesVO> getCategorySales() {
+        List<CategorySalesVO> result = new ArrayList<>();
+        
+        // 获取所有分类
+        List<ProdCategory> categories = categoryMapper.selectList(
+                new LambdaQueryWrapper<ProdCategory>()
+                        .eq(ProdCategory::getParentId, 0)
+                        .orderByAsc(ProdCategory::getSortOrder));
+        
+        // 统计每个分类的商品数量
+        for (ProdCategory category : categories) {
+            // 获取该分类下的商品数量
+            Long productCount = productMapper.selectCount(
+                    new LambdaQueryWrapper<ProdProduct>()
+                            .eq(ProdProduct::getCategoryId, category.getId())
+                            .eq(ProdProduct::getStatus, 1));
+            
+            if (productCount > 0) {
+                // 计算该分类的销售额（通过订单项）
+                List<ProdProduct> categoryProducts = productMapper.selectList(
+                        new LambdaQueryWrapper<ProdProduct>()
+                                .eq(ProdProduct::getCategoryId, category.getId()));
+                
+                List<Long> productIds = categoryProducts.stream()
+                        .map(ProdProduct::getId)
+                        .collect(Collectors.toList());
+                
+                BigDecimal salesAmount = BigDecimal.ZERO;
+                if (!productIds.isEmpty()) {
+                    List<OrderItem> orderItems = orderItemMapper.selectList(
+                            new LambdaQueryWrapper<OrderItem>()
+                                    .in(OrderItem::getProductId, productIds));
+                    
+                    salesAmount = orderItems.stream()
+                            .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                }
+                
+                result.add(new CategorySalesVO(category.getId(), category.getName(), productCount, salesAmount));
+            }
+        }
+        
+        return result;
     }
 }

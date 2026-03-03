@@ -177,14 +177,13 @@ const fetchOrderDetail = async () => {
 
 // 发货
 const handleShip = () => {
-  ElMessageBox.prompt('请输入快递单号', '确认发货', {
+  ElMessageBox.confirm('确定要发货吗？', '确认发货', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
-    inputPattern: /\S+/,
-    inputErrorMessage: '请输入快递单号'
-  }).then(async ({ value }) => {
+    type: 'warning'
+  }).then(async () => {
     try {
-      await shipOrder(orderId.value, '顺丰', value)
+      await shipOrder(orderId.value)
       ElMessage.success('发货成功')
       fetchOrderDetail()
     } catch (error) {
