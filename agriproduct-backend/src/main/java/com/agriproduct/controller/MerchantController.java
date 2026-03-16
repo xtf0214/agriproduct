@@ -5,6 +5,7 @@ import com.agriproduct.dto.MerchantApplyRequest;
 import com.agriproduct.dto.MerchantProductRequest;
 import com.agriproduct.dto.StockUpdateRequest;
 import com.agriproduct.entity.OrderOrder;
+import com.agriproduct.service.FileStorageService;
 import com.agriproduct.service.MerchantService;
 import com.agriproduct.service.OrderService;
 import com.agriproduct.service.ProductService;
@@ -21,10 +22,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 商家控制器
@@ -38,6 +41,16 @@ public class MerchantController {
     private final MerchantService merchantService;
     private final OrderService orderService;
     private final ProductService productService;
+    private final FileStorageService fileStorageService;
+
+    @Operation(summary = "上传图片到 OSS")
+    @PostMapping("/upload")
+    public Result<Map<String, String>> upload(@RequestHeader("X-User-Id") Long userId,
+                                              @RequestParam("file") MultipartFile file) {
+        merchantService.getMerchantByUserId(userId);
+        String url = fileStorageService.upload(file, "merchant/product");
+        return Result.success(Map.of("url", url));
+    }
 
     @Operation(summary = "商家入驻申请")
     @PostMapping("/apply")

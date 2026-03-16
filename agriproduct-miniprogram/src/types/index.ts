@@ -152,7 +152,9 @@ export interface OrderCreateParams {
 }
 
 export interface OrderCreateResult {
-  orderId: string
+  orderId?: string | number
+  id?: number
+  orderNo?: string
   totalAmount: number
   status: number
 }

@@ -2,7 +2,7 @@
   <view class="product-card" @click="handleClick">
     <image 
       class="product-image" 
-      :src="product?.imageUrl || '/static/default-product.png'" 
+      :src="imageSrc" 
       mode="aspectFill"
       @error="handleImageError"
     />
@@ -20,7 +20,10 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import type { Product } from '@/types'
+
+const DEFAULT_PRODUCT_IMAGE = '/static/logo.png'
 
 const props = defineProps<{
   product: Product
@@ -29,6 +32,16 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'click', product: Product): void
 }>()
+
+const imageSrc = ref(DEFAULT_PRODUCT_IMAGE)
+
+watch(
+  () => props.product?.imageUrl,
+  (url) => {
+    imageSrc.value = url || DEFAULT_PRODUCT_IMAGE
+  },
+  { immediate: true }
+)
 
 function handleClick() {
   if (!props.product?.id) {
@@ -43,6 +56,7 @@ function handleClick() {
 }
 
 function handleImageError(e: any) {
+  imageSrc.value = DEFAULT_PRODUCT_IMAGE
   console.error('商品图片加载失败:', props.product?.imageUrl, e)
 }
 </script>

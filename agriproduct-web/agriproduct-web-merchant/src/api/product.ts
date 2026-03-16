@@ -43,7 +43,16 @@ export const unpublishProduct = (id: number) => {
 
 // 获取分类列表
 export const getCategoryList = () => {
-  return request.get<ApiResponse<Category[]>>('/api/home/category')
+  return request.get<ApiResponse<Category[]> | Category[]>('/api/home/category/tree').then((res) => {
+    if (Array.isArray(res)) {
+      return {
+        code: 200,
+        message: 'success',
+        data: res
+      } as ApiResponse<Category[]>
+    }
+    return res
+  })
 }
 
 // 获取分类树

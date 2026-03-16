@@ -2,13 +2,17 @@ import { get, put } from './index'
 
 export interface MerchantItem {
   id: number
+  userId?: number
   shopName: string
   shopDesc?: string
+  shopLogo?: string
   contactPhone: string
   contactName?: string
   businessLicense?: string
   status: number
+  auditRemark?: string
   createTime?: string
+  updateTime?: string
 }
 
 export interface MerchantListParams {

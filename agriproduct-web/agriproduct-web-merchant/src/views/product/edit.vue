@@ -104,8 +104,13 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, FormInstance, FormRules, UploadFile } from 'element-plus'
 import { getProductDetail, addProduct, updateProduct, getCategoryList } from '@/api/product'
-import { getToken } from '@/utils/auth'
+import { getToken, getUserId } from '@/utils/auth'
 import type { ProductForm, Category } from '@/types/api'
+
+interface CategoryOption {
+  id: number
+  name: string
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -113,14 +118,19 @@ const router = useRouter()
 const isEdit = computed(() => !!route.params.id)
 const productId = computed(() => Number(route.params.id))
 const uploadUrl = import.meta.env.VITE_UPLOAD_URL
-const uploadHeaders = computed(() => ({
-  Authorization: `Bearer ${getToken()}`
-}))
+const uploadHeaders = computed(() => {
+  const token = getToken()
+  const userId = getUserId()
+  return {
+    Authorization: token ? `Bearer ${token}` : '',
+    'X-User-Id': userId ? String(userId) : ''
+  }
+})
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
 const submitting = ref(false)
-const categoryList = ref<Category[]>([])
+const categoryList = ref<CategoryOption[]>([])
 
 const formData = reactive<ProductForm>({
   categoryId: 0,
@@ -141,7 +151,16 @@ const rules: FormRules = {
     { required: true, message: '请输入商品名称', trigger: 'blur' }
   ],
   categoryId: [
-    { required: true, message: '请选择商品分类', trigger: 'change' }
+    {
+      validator: (_rule, value, callback) => {
+        if (Number(value) > 0) {
+          callback()
+          return
+        }
+        callback(new Error('请选择商品分类'))
+      },
+      trigger: 'change'
+    }
   ],
   mainImage: [
     { required: true, message: '请上传商品主图', trigger: 'change' }
@@ -154,13 +173,30 @@ const rules: FormRules = {
   ]
 }
 
+const flattenLeafCategories = (categories: Category[], parentPath = ''): CategoryOption[] => {
+  const result: CategoryOption[] = []
+
+  categories.forEach((item) => {
+    const currentPath = parentPath ? `${parentPath} / ${item.name}` : item.name
+    if (item.children && item.children.length > 0) {
+      result.push(...flattenLeafCategories(item.children, currentPath))
+      return
+    }
+
+    result.push({
+      id: item.id,
+      name: currentPath
+    })
+  })
+
+  return result
+}
+
 // 获取分类列表
 const fetchCategoryList = async () => {
   try {
     const res = await getCategoryList()
-    if (res.data) {
-      categoryList.value = res.data
-    }
+    categoryList.value = flattenLeafCategories(res.data || [])
   } catch (error) {
     console.error(error)
   }

@@ -1,5 +1,5 @@
 // 请求配置
-const BASE_URL = 'http://localhost:8080'
+export const BASE_URL = 'http://localhost:8080'
 
 // 请求拦截
 interface RequestConfig {

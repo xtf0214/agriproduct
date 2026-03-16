@@ -33,6 +33,12 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response: AxiosResponse) => {
     const res = response.data
+
+    const isBusinessResponse = res && typeof res === 'object' && Object.prototype.hasOwnProperty.call(res, 'code')
+
+    if (!isBusinessResponse) {
+      return res
+    }
     
     // 业务状态码判断
     if (res.code !== 200) {

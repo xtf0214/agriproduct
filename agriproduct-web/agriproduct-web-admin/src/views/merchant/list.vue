@@ -58,7 +58,7 @@
           >
             审核
           </el-button>
-          <el-button link type="info" size="small">查看详情</el-button>
+          <el-button link type="info" size="small" @click="handleViewDetail(row)">查看详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -118,6 +118,55 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="detailDialogVisible" title="商家详情" width="760px">
+      <el-descriptions v-if="currentDetailMerchant" :column="2" border>
+        <el-descriptions-item label="商家ID">{{ currentDetailMerchant.id }}</el-descriptions-item>
+        <el-descriptions-item label="用户ID">{{ currentDetailMerchant.userId ?? '-' }}</el-descriptions-item>
+        <el-descriptions-item label="店铺名称">{{ currentDetailMerchant.shopName }}</el-descriptions-item>
+        <el-descriptions-item label="联系人">{{ currentDetailMerchant.contactName || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="联系电话">{{ currentDetailMerchant.contactPhone || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="审核状态">
+          <el-tag v-if="currentDetailMerchant.status === 1" type="success">正常</el-tag>
+          <el-tag v-else-if="currentDetailMerchant.status === 0" type="warning">待审核</el-tag>
+          <el-tag v-else type="danger">已拒绝</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ currentDetailMerchant.createTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="更新时间">{{ currentDetailMerchant.updateTime || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="店铺描述" :span="2">{{ currentDetailMerchant.shopDesc || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="审核备注" :span="2">{{ currentDetailMerchant.auditRemark || '-' }}</el-descriptions-item>
+        <el-descriptions-item label="店铺Logo" :span="2">
+          <el-image
+            v-if="currentDetailMerchant.shopLogo"
+            :src="currentDetailMerchant.shopLogo"
+            style="width: 120px; height: 120px"
+            fit="cover"
+            :preview-src-list="[currentDetailMerchant.shopLogo]"
+          />
+          <span v-else>-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="营业执照" :span="2">
+          <el-image
+            v-if="currentDetailMerchant.businessLicense"
+            :src="currentDetailMerchant.businessLicense"
+            style="width: 100%; max-height: 240px"
+            fit="contain"
+            :preview-src-list="[currentDetailMerchant.businessLicense]"
+          />
+          <span v-else>-</span>
+        </el-descriptions-item>
+      </el-descriptions>
+      <template #footer>
+        <el-button @click="detailDialogVisible = false">关闭</el-button>
+        <el-button
+          v-if="currentDetailMerchant && currentDetailMerchant.status === 0"
+          type="primary"
+          @click="handleAuditFromDetail"
+        >
+          去审核
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -141,6 +190,8 @@ const queryParams = reactive({
 const auditDialogVisible = ref(false)
 const auditLoading = ref(false)
 const currentAuditMerchant = ref<MerchantItem | null>(null)
+const detailDialogVisible = ref(false)
+const currentDetailMerchant = ref<MerchantItem | null>(null)
 
 const auditForm = reactive({
   shopName: '',
@@ -187,6 +238,17 @@ function handleAudit(row: MerchantItem) {
   auditForm.auditStatus = 1
   auditForm.auditRemark = ''
   auditDialogVisible.value = true
+}
+
+function handleViewDetail(row: MerchantItem) {
+  currentDetailMerchant.value = row
+  detailDialogVisible.value = true
+}
+
+function handleAuditFromDetail() {
+  if (!currentDetailMerchant.value) return
+  detailDialogVisible.value = false
+  handleAudit(currentDetailMerchant.value)
 }
 
 async function handleAuditSubmit() {

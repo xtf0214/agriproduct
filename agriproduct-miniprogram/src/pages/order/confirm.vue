@@ -179,23 +179,21 @@ async function handleSubmit() {
       params.quantity = quantity.value
     }
     
-    const result = await createOrder(params)
-    
-    uni.showToast({ title: '下单成功', icon: 'success' })
-    
-    // 清空购物车已下单商品
+    await createOrder(params)
+
+    uni.showToast({ title: '支付成功', icon: 'success' })
+
     if (cartIds.value.length > 0) {
-      for (const cartId of cartIds.value) {
-        cartStore.removeProduct(cartId)
-      }
+      const settledCartIds = new Set(cartIds.value)
+      cartStore.cartList = cartStore.cartList.filter(item => !settledCartIds.has(item.cartId))
+      cartStore.selectedIds = cartStore.selectedIds.filter(id => !settledCartIds.has(id))
     }
-    
-    // 跳转到订单详情
+
     setTimeout(() => {
       uni.redirectTo({
-        url: `/pages/order/detail?orderId=${result.orderId}`
+        url: '/pages/order/list'
       })
-    }, 1500)
+    }, 1200)
   } catch (e) {
     console.error('下单失败', e)
     uni.showToast({ title: '下单失败', icon: 'none' })

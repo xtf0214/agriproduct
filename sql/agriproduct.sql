@@ -212,20 +212,14 @@ INSERT INTO `sys_user` (`id`, `username`, `nickname`, `phone`, `password`, `user
 INSERT INTO `sys_user` (`id`, `username`, `nickname`, `phone`, `avatar`, `password`, `user_type`, `status`) VALUES
 (3, 'user01', '张三', '13800138001', 'https://api.dicebear.com/7.x/avataaars/svg?seed=1', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1),
 (4, 'user02', '李四', '13800138002', 'https://api.dicebear.com/7.x/avataaars/svg?seed=2', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1),
-(5, 'user03', '王五', '13800138003', 'https://api.dicebear.com/7.x/avataaars/svg?seed=3', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1),
-(6, 'user04', '赵六', '13800138004', 'https://api.dicebear.com/7.x/avataaars/svg?seed=4', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1),
-(7, 'user05', '孙七', '13800138005', 'https://api.dicebear.com/7.x/avataaars/svg?seed=5', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 0),
-(8, 'user06', '周八', '13800138006', 'https://api.dicebear.com/7.x/avataaars/svg?seed=6', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1),
-(9, 'user07', '吴九', '13800138007', 'https://api.dicebear.com/7.x/avataaars/svg?seed=7', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1),
-(10, 'user08', '郑十', '13800138008', 'https://api.dicebear.com/7.x/avataaars/svg?seed=8', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 1, 1);
 
 -- 插入商家账号 (密码: 123456)
 INSERT INTO `sys_user` (`id`, `username`, `nickname`, `phone`, `avatar`, `password`, `user_type`, `status`) VALUES
-(11, 'merchant01', '绿色农场', '13900139001', 'https://api.dicebear.com/7.x/initials/svg?seed=GF', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
-(12, 'merchant02', '田园果业', '13900139002', 'https://api.dicebear.com/7.x/initials/svg?seed=TY', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
-(13, 'merchant03', '深海渔港', '13900139003', 'https://api.dicebear.com/7.x/initials/svg?seed=SH', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
-(14, 'merchant04', '山里禽蛋', '13900139004', 'https://api.dicebear.com/7.x/initials/svg?seed=SL', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
-(15, 'merchant05', '粮油世家', '13900139005', 'https://api.dicebear.com/7.x/initials/svg?seed=LY', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1);
+(5, 'merchant01', '绿色农场', '13900139001', 'https://api.dicebear.com/7.x/initials/svg?seed=GF', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
+(6, 'merchant02', '田园果业', '13900139002', 'https://api.dicebear.com/7.x/initials/svg?seed=TY', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
+(7, 'merchant03', '深海渔港', '13900139003', 'https://api.dicebear.com/7.x/initials/svg?seed=SH', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
+(8, 'merchant04', '山里禽蛋', '13900139004', 'https://api.dicebear.com/7.x/initials/svg?seed=SL', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1),
+(9, 'merchant05', '粮油世家', '13900139005', 'https://api.dicebear.com/7.x/initials/svg?seed=LY', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 2, 1);
 
 -- 插入收货地址
 INSERT INTO `user_address` (`user_id`, `receiver_name`, `receiver_phone`, `province`, `city`, `district`, `detail_address`, `is_default`) VALUES
@@ -242,13 +236,13 @@ INSERT INTO `user_address` (`user_id`, `receiver_name`, `receiver_phone`, `provi
 
 -- 插入商品分类（一级分类）
 INSERT INTO `prod_category` (`id`, `name`, `parent_id`, `icon`, `sort_order`, `status`) VALUES
-(1, '新鲜蔬菜', 0, 'https://img.icons8.com/color/96/vegetable.png', 1, 1),
+(1, '新鲜蔬菜', 0, 'https://img.icons8.com/?size=96&id=cpa3RyNsYJkU&format=png', 1, 1),
 (2, '新鲜水果', 0, 'https://img.icons8.com/color/96/apple.png', 2, 1),
-(3, '肉禽蛋品', 0, 'https://img.icons8.com/color/96/meat.png', 3, 1),
+(3, '肉禽蛋品', 0, 'https://img.icons8.com/?size=96&id=iErixLlt7v9F&format=png', 3, 1),
 (4, '海鲜水产', 0, 'https://img.icons8.com/color/96/fish.png', 4, 1),
-(5, '粮油调味', 0, 'https://img.icons8.com/color/96/grain.png', 5, 1),
+(5, '粮油调味', 0, 'https://img.icons8.com/color/96/olive-oil-bottle.jpg', 5, 1),
 (6, '乳品烘焙', 0, 'https://img.icons8.com/color/96/milk.png', 6, 1),
-(7, '休闲食品', 0, 'https://img.icons8.com/color/96/snack.png', 7, 1);
+(7, '休闲食品', 0, 'https://img.icons8.com/color/96/potato-chips.jpg', 7, 1);
 
 -- 插入商品分类（二级分类 - 蔬菜）
 INSERT INTO `prod_category` (`name`, `parent_id`, `sort_order`, `status`) VALUES
@@ -317,7 +311,7 @@ INSERT INTO `prod_product` (`merchant_id`, `category_id`, `name`, `subtitle`, `m
 INSERT INTO `prod_product` (`merchant_id`, `category_id`, `name`, `subtitle`, `main_image`, `images`, `price`, `original_price`, `stock`, `sales`, `status`, `audit_status`, `audit_reason`) VALUES
 (5, 5, '东北大米', '五常大米 5kg 香软可口', 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400', '["https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400"]', 65.00, 78.00, 200, 445, 1, 1, NULL),
 (5, 5, '花生油', '古法花生油 5L 香味浓郁', 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400', '["https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400"]', 128.00, 158.00, 80, 234, 1, 1, NULL),
-(5, 5, '酱油', '特级生抽酱油 500ml 鲜味十足', 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400', '["https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400"]', 12.00, 15.00, 300, 567, 1, 1, NULL),
+(5, 5, '酱油', '特级生抽酱油 500ml 鲜味十足', 'https://tse2.mm.bing.net/th/id/OIP.yWjuTtVHuNeqF4Jr1VACdgHaD0?rs=1&pid=ImgDetMain&o=7&rm=3', '["https://tse2.mm.bing.net/th/id/OIP.yWjuTtVHuNeqF4Jr1VACdgHaD0?rs=1&pid=ImgDetMain&o=7&rm=3"]', 12.00, 15.00, 300, 567, 1, 1, NULL),
 (5, 5, '山西老陈醋', '山西老陈醋 500ml 酸香醇厚', 'https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400', '["https://images.unsplash.com/photo-1599940824399-b87987ceb72a?w=400"]', 15.00, 18.00, 150, 321, 1, 1, NULL),
 (5, 6, '纯牛奶', '纯牛奶 250ml*24盒 营养健康', 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400', '["https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400"]', 58.00, 68.00, 200, 678, 1, 1, NULL);
 

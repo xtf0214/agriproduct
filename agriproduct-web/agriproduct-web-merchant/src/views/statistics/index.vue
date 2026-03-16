@@ -29,7 +29,6 @@
               <span class="price">¥{{ row.salesAmount.toFixed(2) }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="productCount" label="销售商品数" width="120" align="center" />
           <el-table-column prop="avgOrderAmount" label="客单价(元)" width="120" align="right">
             <template #default="{ row }">
               <span>¥{{ row.avgOrderAmount.toFixed(2) }}</span>
