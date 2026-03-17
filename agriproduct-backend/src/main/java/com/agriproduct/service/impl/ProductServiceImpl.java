@@ -165,6 +165,10 @@ public class ProductServiceImpl extends ServiceImpl<ProdProductMapper, ProdProdu
         product.setOriginalPrice(request.getOriginalPrice());
         product.setStock(request.getStock());
         product.setDetail(request.getDetail());
+        // 编辑后重新进入审核流程
+        product.setAuditStatus(0);
+        product.setStatus(2);
+        product.setAuditReason(null);
         return updateById(product);
     }
 

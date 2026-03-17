@@ -31,11 +31,11 @@
       <el-table-column label="商品图片" width="100">
         <template #default="{ row }">
           <el-image
-            v-if="row.imageUrl"
-            :src="row.imageUrl"
+            v-if="row.mainImage"
+            :src="row.mainImage"
             style="width: 60px; height: 60px"
             fit="cover"
-            :preview-src-list="[row.imageUrl]"
+            :preview-src-list="[row.mainImage]"
           />
           <el-icon v-else :size="40" color="#c0c4cc"><Picture /></el-icon>
         </template>
@@ -49,12 +49,18 @@
       </el-table-column>
       <el-table-column prop="stock" label="库存" width="100" />
       <el-table-column prop="sales" label="销量" width="100" />
-      <el-table-column label="状态" width="100">
+      <el-table-column label="审核状态" width="100">
         <template #default="{ row }">
-          <el-tag v-if="row.status === 0" type="warning">待审核</el-tag>
+          <el-tag v-if="row.auditStatus === 0" type="warning">待审核</el-tag>
+          <el-tag v-else-if="row.auditStatus === 1" type="success">已通过</el-tag>
+          <el-tag v-else-if="row.auditStatus === 2" type="danger">已拒绝</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="上架状态" width="100">
+        <template #default="{ row }">
+          <el-tag v-if="row.status === 0" type="info">已下架</el-tag>
           <el-tag v-else-if="row.status === 1" type="success">已上架</el-tag>
-          <el-tag v-else-if="row.status === 2" type="info">已下架</el-tag>
-          <el-tag v-else-if="row.status === 3" type="danger">审核拒绝</el-tag>
+          <el-tag v-else-if="row.status === 2" type="warning">审核中</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
@@ -63,7 +69,7 @@
             查看详情
           </el-button>
           <el-button
-            v-if="row.status === 0"
+            v-if="row.auditStatus === 0"
             link
             type="success"
             size="small"
@@ -72,7 +78,7 @@
             通过
           </el-button>
           <el-button
-            v-if="row.status === 0"
+            v-if="row.auditStatus === 0"
             link
             type="danger"
             size="small"
@@ -111,25 +117,29 @@
         <el-descriptions-item label="商家">
           {{ currentProduct.merchantName }}
         </el-descriptions-item>
-        <el-descriptions-item label="状态">
-          <el-tag v-if="currentProduct.status === 0" type="warning">待审核</el-tag>
+        <el-descriptions-item label="审核状态">
+          <el-tag v-if="currentProduct.auditStatus === 0" type="warning">待审核</el-tag>
+          <el-tag v-else-if="currentProduct.auditStatus === 1" type="success">已通过</el-tag>
+          <el-tag v-else-if="currentProduct.auditStatus === 2" type="danger">已拒绝</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="上架状态">
+          <el-tag v-if="currentProduct.status === 0" type="info">已下架</el-tag>
           <el-tag v-else-if="currentProduct.status === 1" type="success">已上架</el-tag>
-          <el-tag v-else-if="currentProduct.status === 2" type="info">已下架</el-tag>
-          <el-tag v-else-if="currentProduct.status === 3" type="danger">审核拒绝</el-tag>
+          <el-tag v-else-if="currentProduct.status === 2" type="warning">审核中</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="创建时间">
           {{ currentProduct.createTime }}
         </el-descriptions-item>
         <el-descriptions-item label="商品描述" :span="2">
-          {{ currentProduct.description || '-' }}
+          {{ currentProduct.detail || '-' }}
         </el-descriptions-item>
         <el-descriptions-item label="商品图片" :span="2">
           <el-image
-            v-if="currentProduct.imageUrl"
-            :src="currentProduct.imageUrl"
+            v-if="currentProduct.mainImage"
+            :src="currentProduct.mainImage"
             style="width: 200px"
             fit="contain"
-            :preview-src-list="[currentProduct.imageUrl]"
+            :preview-src-list="[currentProduct.mainImage]"
           />
           <span v-else>暂无图片</span>
         </el-descriptions-item>
@@ -137,14 +147,14 @@
       <template #footer>
         <el-button @click="detailDialogVisible = false">关闭</el-button>
         <el-button
-          v-if="currentProduct && currentProduct.status === 0"
+          v-if="currentProduct && currentProduct.auditStatus === 0"
           type="success"
           @click="handleAudit(currentProduct, 1)"
         >
           通过
         </el-button>
         <el-button
-          v-if="currentProduct && currentProduct.status === 0"
+          v-if="currentProduct && currentProduct.auditStatus === 0"
           type="danger"
           @click="handleAudit(currentProduct, 2)"
         >

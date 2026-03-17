@@ -22,6 +22,8 @@ public class ProductVO {
 
     private Long merchantId;
 
+    private String merchantName;
+
     private Long categoryId;
 
     private String categoryName;

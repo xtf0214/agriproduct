@@ -80,6 +80,12 @@
       "style": {
         "navigationBarTitleText": "搜索"
       }
+    },
+    {
+      "path": "pages/profile/edit",
+      "style": {
+        "navigationBarTitleText": "编辑资料"
+      }
     }
   ],
   "globalStyle": {

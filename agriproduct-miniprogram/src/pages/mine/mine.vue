@@ -80,7 +80,8 @@ function goLogin() {
 
 // 跳转个人信息
 function goProfile() {
-  uni.showToast({ title: '个人信息编辑待开发', icon: 'none' })
+  if (!userStore.checkLogin()) return
+  uni.navigateTo({ url: '/pages/profile/edit' })
 }
 
 // 跳转订单列表

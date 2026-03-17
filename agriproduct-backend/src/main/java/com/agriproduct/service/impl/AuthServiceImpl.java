@@ -1,9 +1,11 @@
 package com.agriproduct.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.StrUtil;
 
 import com.agriproduct.dto.LoginRequest;
 import com.agriproduct.dto.RegisterRequest;
+import com.agriproduct.dto.UserUpdateRequest;
 import com.agriproduct.entity.Merchant;
 import com.agriproduct.entity.SysUser;
 import com.agriproduct.exception.BusinessException;
@@ -152,6 +154,36 @@ public class AuthServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impleme
             throw new BusinessException("用户不存在");
         }
         return BeanUtil.copyProperties(user, UserInfoVO.class);
+    }
+
+    @Override
+    public Boolean updateUserInfo(Long userId, UserUpdateRequest request) {
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 更新昵称
+        if (StrUtil.isNotBlank(request.getNickname())) {
+            user.setNickname(request.getNickname());
+        }
+
+        // 更新头像
+        if (StrUtil.isNotBlank(request.getAvatar())) {
+            user.setAvatar(request.getAvatar());
+        }
+
+        // 更新手机号
+        if (StrUtil.isNotBlank(request.getPhone())) {
+            // 检查手机号是否被其他用户使用
+            SysUser existingUser = getByPhone(request.getPhone());
+            if (existingUser != null && !existingUser.getId().equals(userId)) {
+                throw new BusinessException("该手机号已被其他用户使用");
+            }
+            user.setPhone(request.getPhone());
+        }
+
+        return updateById(user);
     }
 
     /**

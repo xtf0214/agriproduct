@@ -45,6 +45,12 @@ export interface LoginResult {
   userType: string
 }
 
+export interface UserUpdateParams {
+  nickname?: string
+  avatar?: string
+  phone?: string
+}
+
 // 轮播图
 export interface Banner {
   id: number

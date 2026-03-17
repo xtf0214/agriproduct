@@ -2,6 +2,7 @@ package com.agriproduct.service;
 
 import com.agriproduct.dto.LoginRequest;
 import com.agriproduct.dto.RegisterRequest;
+import com.agriproduct.dto.UserUpdateRequest;
 import com.agriproduct.vo.LoginResponse;
 import com.agriproduct.vo.UserInfoVO;
 
@@ -33,4 +34,13 @@ public interface AuthService {
      * @return 用户信息
      */
     UserInfoVO getUserInfo(Long userId);
+
+    /**
+     * 更新用户信息
+     *
+     * @param userId 用户ID
+     * @param request 更新请求
+     * @return 是否成功
+     */
+    Boolean updateUserInfo(Long userId, UserUpdateRequest request);
 }

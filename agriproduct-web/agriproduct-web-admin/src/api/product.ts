@@ -6,12 +6,14 @@ export interface AuditProductItem {
   price: number
   stock: number
   sales: number
-  imageUrl?: string
-  description?: string
+  mainImage?: string
+  detail?: string
   merchantId: number
   merchantName: string
   categoryName?: string
   status: number
+  auditStatus: number
+  auditReason?: string
   createTime?: string
 }
 

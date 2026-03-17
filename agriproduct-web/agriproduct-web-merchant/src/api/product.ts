@@ -1,9 +1,14 @@
 import { request } from '@/utils/request'
 import type { ApiResponse, PageResult, Product, ProductForm, Category } from '@/types/api'
 
-// 获取商品列表
+// 获取商品列表（通用，用于管理后台）
 export const getProductList = (params: { pageNum?: number; pageSize?: number; keyword?: string; status?: number }) => {
   return request.get<ApiResponse<PageResult<Product>>>('/api/product/list', params)
+}
+
+// 获取商家商品列表（商家端，只显示当前商家的商品）
+export const getMerchantProductList = (params: { pageNum?: number; pageSize?: number; keyword?: string; status?: number }) => {
+  return request.get<ApiResponse<PageResult<Product>>>('/api/merchant/product/list', params)
 }
 
 // 获取商品详情

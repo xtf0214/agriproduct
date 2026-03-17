@@ -205,6 +205,20 @@ public class AdminServiceImpl implements AdminService {
 
     private ProductVO convertProductToVO(ProdProduct product) {
         ProductVO vo = BeanUtil.copyProperties(product, ProductVO.class);
+        // 设置商家名称
+        if (product.getMerchantId() != null) {
+            Merchant merchant = merchantMapper.selectById(product.getMerchantId());
+            if (merchant != null) {
+                vo.setMerchantName(merchant.getShopName());
+            }
+        }
+        // 设置分类名称
+        if (product.getCategoryId() != null) {
+            ProdCategory category = categoryMapper.selectById(product.getCategoryId());
+            if (category != null) {
+                vo.setCategoryName(category.getName());
+            }
+        }
         return vo;
     }
 

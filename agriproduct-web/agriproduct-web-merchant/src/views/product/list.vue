@@ -114,11 +114,11 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { 
-  getProductList, 
-  deleteProduct, 
-  publishProduct, 
-  unpublishProduct 
+import {
+  getMerchantProductList,
+  deleteProduct,
+  publishProduct,
+  unpublishProduct
 } from '@/api/product'
 import { productStatusText, auditStatusText } from '@/utils/format'
 import type { Product } from '@/types/api'
@@ -142,7 +142,7 @@ const pagination = reactive({
 const fetchProductList = async () => {
   loading.value = true
   try {
-    const res = await getProductList({
+    const res = await getMerchantProductList({
       pageNum: pagination.page,
       pageSize: pagination.size,
       ...searchForm

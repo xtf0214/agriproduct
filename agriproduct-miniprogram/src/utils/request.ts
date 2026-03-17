@@ -166,4 +166,75 @@ export function del<T = any>(url: string, data?: any, config?: Partial<RequestCo
   return request<T>({ url, method: 'DELETE', data, ...config })
 }
 
-export default { request, get, post, put, del }
+// 上传请求配置
+interface UploadConfig {
+  url: string
+  filePath: string
+  name?: string
+  showLoading?: boolean
+  showError?: boolean
+}
+
+// 文件上传
+export function upload<T = any>(config: UploadConfig): Promise<T> {
+  const { url, filePath, name = 'file', showLoading = false, showError = true } = config
+
+  if (showLoading) {
+    uni.showLoading({ title: '上传中...', mask: true })
+  }
+
+  // 获取 token 和 userId
+  const token = getToken()
+  const userId = getUserId()
+  const header: Record<string, string> = {}
+
+  if (token) {
+    header['Authorization'] = `Bearer ${token}`
+  }
+  if (userId) {
+    header['X-User-Id'] = userId
+  }
+
+  return new Promise((resolve, reject) => {
+    uni.uploadFile({
+      url: BASE_URL + url,
+      filePath,
+      name,
+      header,
+      success: (res) => {
+        if (showLoading) {
+          uni.hideLoading()
+        }
+
+        if (res.statusCode === 200) {
+          const data = JSON.parse(res.data)
+          if (data.code === 200) {
+            resolve(data.data)
+          } else {
+            const errorMessage = data.message || '上传失败'
+            if (showError) {
+              uni.showToast({ title: errorMessage, icon: 'none' })
+            }
+            reject(new Error(errorMessage))
+          }
+        } else {
+          if (showError) {
+            uni.showToast({ title: '上传失败', icon: 'none' })
+          }
+          reject(new Error('上传失败'))
+        }
+      },
+      fail: (err) => {
+        if (showLoading) {
+          uni.hideLoading()
+        }
+        if (showError) {
+          uni.showToast({ title: '上传失败', icon: 'none' })
+        }
+        reject(err)
+      }
+    })
+  })
+}
+
+export default { request, get, post, put, del, upload }
