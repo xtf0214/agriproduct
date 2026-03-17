@@ -54,16 +54,6 @@
         <text class="menu-text">收货地址</text>
         <text class="menu-arrow">›</text>
       </view>
-      <view class="menu-item" @click="handleFeedback">
-        <text class="menu-icon">💬</text>
-        <text class="menu-text">意见反馈</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="menu-item" @click="handleAbout">
-        <text class="menu-icon">ℹ️</text>
-        <text class="menu-text">关于我们</text>
-        <text class="menu-arrow">›</text>
-      </view>
     </view>
     
     <!-- 退出登录 -->

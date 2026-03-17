@@ -57,7 +57,6 @@
       
       <view class="action-buttons">
         <button class="btn-cart" @click="handleAddCart">加入购物车</button>
-        <button class="btn-buy" @click="handleBuyNow">立即购买</button>
       </view>
     </view>
     
@@ -148,13 +147,6 @@ function decreaseQuantity() {
 function handleAddCart() {
   if (!userStore.checkLogin()) return
   actionType.value = 'cart'
-  showQuantityPopup.value = true
-}
-
-// 立即购买
-function handleBuyNow() {
-  if (!userStore.checkLogin()) return
-  actionType.value = 'buy'
   showQuantityPopup.value = true
 }
 

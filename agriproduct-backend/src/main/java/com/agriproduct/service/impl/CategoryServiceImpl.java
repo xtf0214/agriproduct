@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,38 @@ public class CategoryServiceImpl extends ServiceImpl<ProdCategoryMapper, ProdCat
                 ).stream()
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Long> getCategoryAndChildrenIds(Long categoryId) {
+        List<Long> ids = new ArrayList<>();
+        ids.add(categoryId);
+        
+        // 递归获取所有子分类ID
+        collectChildrenIds(categoryId, ids);
+        
+        return ids;
+    }
+
+    /**
+     * 递归收集所有子分类ID
+     */
+    private void collectChildrenIds(Long parentId, List<Long> ids) {
+        List<ProdCategory> children = list(new LambdaQueryWrapper<ProdCategory>()
+                .eq(ProdCategory::getParentId, parentId)
+                .select(ProdCategory::getId));
+        
+        for (ProdCategory child : children) {
+            ids.add(child.getId());
+            collectChildrenIds(child.getId(), ids);
+        }
+    }
+
+    @Override
+    public boolean hasChildren(Long categoryId) {
+        long count = count(new LambdaQueryWrapper<ProdCategory>()
+                .eq(ProdCategory::getParentId, categoryId));
+        return count > 0;
     }
 
     private CategoryVO buildCategoryTree(ProdCategory category, List<ProdCategory> allCategories) {

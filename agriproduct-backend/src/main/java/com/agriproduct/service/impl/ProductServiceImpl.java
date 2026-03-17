@@ -6,9 +6,11 @@ import cn.hutool.json.JSONUtil;
 
 import com.agriproduct.dto.MerchantProductRequest;
 import com.agriproduct.dto.ProductQueryRequest;
+import com.agriproduct.entity.ProdCategory;
 import com.agriproduct.entity.ProdProduct;
 import com.agriproduct.exception.BusinessException;
 import com.agriproduct.mapper.ProdProductMapper;
+import com.agriproduct.service.CategoryService;
 import com.agriproduct.service.ProductService;
 import com.agriproduct.vo.ProductVO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -24,6 +26,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl extends ServiceImpl<ProdProductMapper, ProdProduct> implements ProductService {
+
+    private final CategoryService categoryService;
 
     @Override
     public IPage<ProductVO> getProductList(Page<ProdProduct> page, ProductQueryRequest queryRequest) {
@@ -226,7 +230,16 @@ public class ProductServiceImpl extends ServiceImpl<ProdProductMapper, ProdProdu
 
         if (queryRequest != null) {
             if (queryRequest.getCategoryId() != null) {
-                wrapper.eq(ProdProduct::getCategoryId, queryRequest.getCategoryId());
+                // 如果该分类有子分类，则查询该分类及其所有子分类的商品
+                // 如果该分类没有子分类（叶子分类），则只查询该分类的商品
+                if (categoryService.hasChildren(queryRequest.getCategoryId())) {
+                    // 有子分类，查询该分类及其所有子分类的商品
+                    List<Long> categoryIds = categoryService.getCategoryAndChildrenIds(queryRequest.getCategoryId());
+                    wrapper.in(ProdProduct::getCategoryId, categoryIds);
+                } else {
+                    // 叶子分类，只查询该分类的商品
+                    wrapper.eq(ProdProduct::getCategoryId, queryRequest.getCategoryId());
+                }
             }
 
             if (StrUtil.isNotBlank(queryRequest.getKeyword())) {

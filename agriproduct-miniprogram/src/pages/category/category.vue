@@ -112,6 +112,8 @@ async function fetchProducts(reset = false) {
   loadStatus.value = 'loading'
   
   try {
+    // 如果选择了二级分类，则只查询该二级分类的商品
+    // 如果只选择了一级分类（没有选择二级分类），则查询该一级分类及其所有子分类的商品
     const categoryId = currentSubId.value || currentCategoryId.value || undefined
     const res: PageResponse<Product> = await getProductList({
       pageNum: pageNum.value,
@@ -147,7 +149,7 @@ function selectCategory(id: number) {
   fetchProducts(true)
 }
 
-// 选择子分类
+// 选择子分类（点击后只显示该子分类的商品）
 function selectSubCategory(id: number) {
   currentSubId.value = id
   fetchProducts(true)
