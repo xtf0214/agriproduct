@@ -43,9 +43,20 @@ public class AdminServiceImpl implements AdminService {
     // ========== 用户管理 ==========
 
     @Override
-    public IPage<UserInfoVO> getUserList(Page<SysUser> page) {
-        IPage<SysUser> userPage = userMapper.selectPage(page, null);
-        
+    public IPage<UserInfoVO> getUserList(Page<SysUser> page, String username, String phone) {
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+
+        if (username != null && !username.trim().isEmpty()) {
+            wrapper.like(SysUser::getUsername, username.trim());
+        }
+        if (phone != null && !phone.trim().isEmpty()) {
+            wrapper.like(SysUser::getPhone, phone.trim());
+        }
+
+        wrapper.orderByDesc(SysUser::getCreateTime);
+
+        IPage<SysUser> userPage = userMapper.selectPage(page, wrapper);
+
         Page<UserInfoVO> result = new Page<>(userPage.getCurrent(), userPage.getSize(), userPage.getTotal());
         result.setRecords(userPage.getRecords().stream()
                 .map(this::convertUserToVO)
@@ -66,9 +77,20 @@ public class AdminServiceImpl implements AdminService {
     // ========== 商家管理 ==========
 
     @Override
-    public IPage<MerchantVO> getMerchantList(Page<Merchant> page) {
-        IPage<Merchant> merchantPage = merchantMapper.selectPage(page, null);
-        
+    public IPage<MerchantVO> getMerchantList(Page<Merchant> page, String shopName, Integer status) {
+        LambdaQueryWrapper<Merchant> wrapper = new LambdaQueryWrapper<>();
+
+        if (shopName != null && !shopName.trim().isEmpty()) {
+            wrapper.like(Merchant::getShopName, shopName.trim());
+        }
+        if (status != null) {
+            wrapper.eq(Merchant::getStatus, status);
+        }
+
+        wrapper.orderByDesc(Merchant::getCreateTime);
+
+        IPage<Merchant> merchantPage = merchantMapper.selectPage(page, wrapper);
+
         Page<MerchantVO> result = new Page<>(merchantPage.getCurrent(), merchantPage.getSize(), merchantPage.getTotal());
         result.setRecords(merchantPage.getRecords().stream()
                 .map(this::convertMerchantToVO)

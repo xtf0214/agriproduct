@@ -26,13 +26,13 @@ public interface AdminService {
 
     // ========== 用户管理 ==========
 
-    IPage<UserInfoVO> getUserList(Page<SysUser> page);
+    IPage<UserInfoVO> getUserList(Page<SysUser> page, String username, String phone);
 
     Boolean updateUserStatus(Long userId, UserStatusRequest request);
 
     // ========== 商家管理 ==========
 
-    IPage<MerchantVO> getMerchantList(Page<Merchant> page);
+    IPage<MerchantVO> getMerchantList(Page<Merchant> page, String shopName, Integer status);
 
     Boolean auditMerchant(Long merchantId, MerchantAuditRequest request);
 

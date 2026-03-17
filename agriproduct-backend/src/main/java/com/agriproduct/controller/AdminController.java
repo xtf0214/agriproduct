@@ -45,9 +45,11 @@ public class AdminController {
     @GetMapping("/user/list")
     public Result<IPage<UserInfoVO>> getUserList(
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String phone) {
         Page<SysUser> page = new Page<>(pageNum, pageSize);
-        IPage<UserInfoVO> result = adminService.getUserList(page);
+        IPage<UserInfoVO> result = adminService.getUserList(page, username, phone);
         return Result.success(result);
     }
 
@@ -65,9 +67,11 @@ public class AdminController {
     @GetMapping("/merchant/list")
     public Result<IPage<MerchantVO>> getMerchantList(
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String shopName,
+            @RequestParam(required = false) Integer status) {
         Page<Merchant> page = new Page<>(pageNum, pageSize);
-        IPage<MerchantVO> result = adminService.getMerchantList(page);
+        IPage<MerchantVO> result = adminService.getMerchantList(page, shopName, status);
         return Result.success(result);
     }
 

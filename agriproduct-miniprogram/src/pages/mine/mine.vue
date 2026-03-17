@@ -54,6 +54,11 @@
         <text class="menu-text">收货地址</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-item" @click="goMerchantApply">
+        <text class="menu-icon">🏪</text>
+        <text class="menu-text">商家入驻</text>
+        <text class="menu-arrow">›</text>
+      </view>
     </view>
     
     <!-- 退出登录 -->
@@ -99,6 +104,12 @@ function goOrders(status?: number) {
 function goAddress() {
   if (!userStore.checkLogin()) return
   uni.navigateTo({ url: '/pages/address/list' })
+}
+
+// 跳转商家入驻申请
+function goMerchantApply() {
+  if (!userStore.checkLogin()) return
+  uni.navigateTo({ url: '/pages/merchant/apply' })
 }
 
 // 意见反馈

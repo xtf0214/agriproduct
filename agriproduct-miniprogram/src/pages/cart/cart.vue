@@ -15,7 +15,13 @@
             <text class="item-price">¥{{ item.price.toFixed(2) }}</text>
             <view class="quantity-control">
               <text class="btn-minus" :class="{ disabled: item.quantity <= 1 }" @click="handleDecrease(item)">-</text>
-              <text class="quantity-value">{{ item.quantity }}</text>
+              <input
+                class="quantity-input"
+                type="number"
+                :value="item.quantity"
+                @blur="handleQuantityChange(item, $event)"
+                @confirm="handleQuantityChange(item, $event)"
+              />
               <text class="btn-plus" @click="handleIncrease(item)">+</text>
             </view>
           </view>
@@ -91,6 +97,31 @@ function handleDecrease(item: CartItem) {
 // 增加数量
 function handleIncrease(item: CartItem) {
   cartStore.updateQuantity(item.cartId, item.quantity + 1)
+}
+
+// 数量输入变更
+function handleQuantityChange(item: CartItem, e: any) {
+  const value = e.detail.value
+  const newQuantity = parseInt(value)
+
+  // 验证输入
+  if (isNaN(newQuantity) || newQuantity < 1) {
+    uni.showToast({ title: '数量不能小于1', icon: 'none' })
+    // 重置为原数量
+    cartStore.updateQuantity(item.cartId, item.quantity)
+    return
+  }
+
+  if (newQuantity > 999) {
+    uni.showToast({ title: '数量不能超过999', icon: 'none' })
+    cartStore.updateQuantity(item.cartId, item.quantity)
+    return
+  }
+
+  // 如果数量有变化，则更新
+  if (newQuantity !== item.quantity) {
+    cartStore.updateQuantity(item.cartId, newQuantity)
+  }
 }
 
 // 删除商品
@@ -220,7 +251,7 @@ onMounted(() => {
         .quantity-control {
           display: flex;
           align-items: center;
-          
+
           .btn-minus, .btn-plus {
             width: 48rpx;
             height: 48rpx;
@@ -230,16 +261,20 @@ onMounted(() => {
             font-size: 32rpx;
             color: #333;
             border-radius: 8rpx;
-            
+
             &.disabled {
               color: #ccc;
             }
           }
-          
-          .quantity-value {
-            width: 60rpx;
+
+          .quantity-input {
+            width: 70rpx;
+            height: 48rpx;
             text-align: center;
             font-size: 28rpx;
+            background-color: #f5f5f5;
+            border-radius: 8rpx;
+            margin: 0 4rpx;
           }
         }
       }

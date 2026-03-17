@@ -188,3 +188,37 @@ export const OrderStatusText: Record<OrderStatus, string> = {
   [OrderStatus.COMPLETED]: '已完成',
   [OrderStatus.CANCELLED]: '已取消'
 }
+
+// 商家相关
+export interface MerchantApplyParams {
+  shopName: string
+  shopDesc: string
+  businessLicense: string
+  contactPhone: string
+  contactName: string
+}
+
+export interface MerchantInfo {
+  id: number
+  userId: number
+  shopName: string
+  shopDesc: string
+  businessLicense: string
+  contactPhone: string
+  contactName: string
+  status: number // 0-待审核 1-已通过 2-已拒绝
+  createTime?: string
+}
+
+// 商家状态枚举
+export enum MerchantStatus {
+  PENDING = 0,     // 待审核
+  APPROVED = 1,    // 已通过
+  REJECTED = 2     // 已拒绝
+}
+
+export const MerchantStatusText: Record<MerchantStatus, string> = {
+  [MerchantStatus.PENDING]: '待审核',
+  [MerchantStatus.APPROVED]: '已通过',
+  [MerchantStatus.REJECTED]: '已拒绝'
+}

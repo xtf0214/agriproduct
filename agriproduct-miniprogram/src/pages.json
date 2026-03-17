@@ -86,6 +86,12 @@
       "style": {
         "navigationBarTitleText": "编辑资料"
       }
+    },
+    {
+      "path": "pages/merchant/apply",
+      "style": {
+        "navigationBarTitleText": "商家入驻申请"
+      }
     }
   ],
   "globalStyle": {

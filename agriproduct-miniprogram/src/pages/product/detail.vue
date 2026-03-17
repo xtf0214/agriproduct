@@ -76,7 +76,7 @@
             <text class="quantity-label">数量</text>
             <view class="quantity-control">
               <text class="btn-minus" :class="{ disabled: quantity <= 1 }" @click="decreaseQuantity">-</text>
-              <text class="quantity-value">{{ quantity }}</text>
+              <input class="quantity-input" type="number" v-model="quantity" :min="1" :max="product?.stock || 1" @blur="validateQuantity" />
               <text class="btn-plus" :class="{ disabled: quantity >= (product?.stock || 1) }" @click="increaseQuantity">+</text>
             </view>
           </view>
@@ -141,6 +141,18 @@ function decreaseQuantity() {
   if (quantity.value > 1) {
     quantity.value--
   }
+}
+
+// 验证输入数量
+function validateQuantity() {
+  const stock = product.value?.stock || 1
+  let value = Number(quantity.value)
+  if (isNaN(value) || value < 1) {
+    value = 1
+  } else if (value > stock) {
+    value = stock
+  }
+  quantity.value = Math.floor(value)
 }
 
 // 加入购物车
@@ -459,10 +471,14 @@ onMounted(async () => {
           }
         }
         
-        .quantity-value {
+        .quantity-input {
           width: 80rpx;
+          height: 56rpx;
           text-align: center;
           font-size: 28rpx;
+          background-color: #f5f5f5;
+          border-radius: 8rpx;
+          margin: 0 4rpx;
         }
       }
     }

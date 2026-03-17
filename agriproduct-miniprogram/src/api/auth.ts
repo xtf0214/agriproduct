@@ -23,5 +23,9 @@ export function updateProfile(data: UserUpdateParams) {
 
 // 上传用户头像
 export function uploadAvatar(filePath: string) {
-  return upload<{ url: string }>('/api/auth/avatar/upload', filePath, { showLoading: true })
+  return upload<{ url: string }>({
+    url: '/api/auth/avatar/upload',
+    filePath,
+    showLoading: true
+  })
 }

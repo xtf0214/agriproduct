@@ -179,6 +179,9 @@ interface UploadConfig {
 export function upload<T = any>(config: UploadConfig): Promise<T> {
   const { url, filePath, name = 'file', showLoading = false, showError = true } = config
 
+  const fullUrl = BASE_URL + url
+  console.log('上传文件:', { url, fullUrl, filePath })
+
   if (showLoading) {
     uni.showLoading({ title: '上传中...', mask: true })
   }
@@ -192,44 +195,75 @@ export function upload<T = any>(config: UploadConfig): Promise<T> {
     header['Authorization'] = `Bearer ${token}`
   }
   if (userId) {
-    header['X-User-Id'] = userId
+    header['X-User-Id'] = String(userId)
   }
+
+  console.log('上传请求:', { url: fullUrl, hasToken: !!token, userId })
 
   return new Promise((resolve, reject) => {
     uni.uploadFile({
-      url: BASE_URL + url,
+      url: fullUrl,
       filePath,
       name,
       header,
       success: (res) => {
+        console.log('上传响应 statusCode:', res.statusCode)
+        console.log('上传响应 data:', res.data)
+
         if (showLoading) {
           uni.hideLoading()
         }
 
         if (res.statusCode === 200) {
-          const data = JSON.parse(res.data)
-          if (data.code === 200) {
-            resolve(data.data)
-          } else {
-            const errorMessage = data.message || '上传失败'
-            if (showError) {
-              uni.showToast({ title: errorMessage, icon: 'none' })
+          try {
+            const data = JSON.parse(res.data)
+            console.log('解析响应数据:', data)
+            if (data.code === 200) {
+              console.log('上传成功:', data.data)
+              resolve(data.data)
+            } else {
+              const errorMessage = data.message || '上传失败'
+              console.error('上传业务错误:', errorMessage)
+              if (showError) {
+                uni.showToast({ title: errorMessage, icon: 'none', duration: 3000 })
+              }
+              reject(new Error(errorMessage))
             }
-            reject(new Error(errorMessage))
+          } catch (e) {
+            console.error('JSON解析失败:', res.data, e)
+            if (showError) {
+              uni.showToast({ title: '服务器响应异常', icon: 'none' })
+            }
+            reject(new Error('JSON解析失败: ' + res.data))
           }
-        } else {
+        } else if (res.statusCode === 401) {
+          console.error('未登录或token过期')
+          uni.removeStorageSync('token')
+          uni.removeStorageSync('userId')
+          uni.removeStorageSync('userInfo')
           if (showError) {
-            uni.showToast({ title: '上传失败', icon: 'none' })
+            uni.showToast({ title: '请先登录', icon: 'none' })
           }
-          reject(new Error('上传失败'))
+          setTimeout(() => {
+            uni.navigateTo({ url: '/pages/login/login' })
+          }, 1500)
+          reject(new Error('未登录'))
+        } else {
+          console.error('HTTP错误:', res.statusCode, res.data)
+          if (showError) {
+            uni.showToast({ title: `上传失败(${res.statusCode})`, icon: 'none' })
+          }
+          reject(new Error(`HTTP ${res.statusCode}: ${res.data}`))
         }
       },
       fail: (err) => {
+        console.error('上传请求失败:', JSON.stringify(err))
         if (showLoading) {
           uni.hideLoading()
         }
         if (showError) {
-          uni.showToast({ title: '上传失败', icon: 'none' })
+          const errMsg = err.errMsg || '网络请求失败'
+          uni.showToast({ title: errMsg, icon: 'none' })
         }
         reject(err)
       }
