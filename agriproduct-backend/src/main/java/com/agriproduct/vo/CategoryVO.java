@@ -26,6 +26,8 @@ public class CategoryVO {
 
     private Integer sortOrder;
 
+    private Integer status;
+
     private List<CategoryVO> children;
 
     private Boolean hasChildren;

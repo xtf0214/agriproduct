@@ -3,6 +3,7 @@ package com.agriproduct.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 
 import com.agriproduct.dto.BannerRequest;
+import com.agriproduct.dto.CategoryRequest;
 import com.agriproduct.dto.MerchantAuditRequest;
 import com.agriproduct.dto.ProductAuditRequest;
 import com.agriproduct.dto.UserStatusRequest;
@@ -211,6 +212,179 @@ public class AdminServiceImpl implements AdminService {
             throw new BusinessException("轮播图不存在");
         }
         return bannerMapper.deleteById(bannerId) > 0;
+    }
+
+    // ========== 分类管理 ==========
+
+    @Override
+    public List<CategoryVO> getCategoryTree() {
+        List<ProdCategory> allCategories = categoryMapper.selectList(
+                new LambdaQueryWrapper<ProdCategory>()
+                        .orderByAsc(ProdCategory::getSortOrder)
+        );
+
+        List<ProdCategory> topCategories = allCategories.stream()
+                .filter(c -> c.getParentId() == null || c.getParentId() == 0)
+                .collect(Collectors.toList());
+
+        return topCategories.stream()
+                .map(category -> buildCategoryTree(category, allCategories))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CategoryVO> getTopCategories() {
+        return categoryMapper.selectList(new LambdaQueryWrapper<ProdCategory>()
+                        .eq(ProdCategory::getParentId, 0)
+                        .or()
+                        .isNull(ProdCategory::getParentId)
+                        .orderByAsc(ProdCategory::getSortOrder)
+                ).stream()
+                .map(this::convertCategoryToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CategoryVO> getChildrenCategories(Long parentId) {
+        return categoryMapper.selectList(new LambdaQueryWrapper<ProdCategory>()
+                        .eq(ProdCategory::getParentId, parentId)
+                        .orderByAsc(ProdCategory::getSortOrder)
+                ).stream()
+                .map(this::convertCategoryToVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createCategory(CategoryRequest request) {
+        // 验证分类名称是否重复
+        LambdaQueryWrapper<ProdCategory> wrapper = new LambdaQueryWrapper<ProdCategory>()
+                .eq(ProdCategory::getName, request.getName().trim());
+        
+        // 如果指定了父分类，检查父分类是否存在
+        if (request.getParentId() != null && request.getParentId() > 0) {
+            ProdCategory parent = categoryMapper.selectById(request.getParentId());
+            if (parent == null) {
+                throw new BusinessException("父分类不存在");
+            }
+            // 二级分类不能有子分类（只支持两级）
+            if (parent.getParentId() != null && parent.getParentId() > 0) {
+                throw new BusinessException("不支持创建三级分类，只能在一级分类下创建二级分类");
+            }
+        }
+        
+        // 检查同级分类下名称是否重复
+        if (request.getParentId() != null && request.getParentId() > 0) {
+            wrapper.eq(ProdCategory::getParentId, request.getParentId());
+        } else {
+            wrapper.and(w -> w.isNull(ProdCategory::getParentId).or().eq(ProdCategory::getParentId, 0));
+        }
+        
+        Long existCount = categoryMapper.selectCount(wrapper);
+        if (existCount > 0) {
+            throw new BusinessException("同级分类下已存在同名分类");
+        }
+        
+        ProdCategory category = new ProdCategory();
+        category.setName(request.getName().trim());
+        category.setParentId(request.getParentId() != null && request.getParentId() > 0 ? request.getParentId() : 0L);
+        category.setIcon(request.getIcon());
+        category.setSortOrder(request.getSortOrder() != null ? request.getSortOrder() : 0);
+        category.setStatus(request.getStatus() != null ? request.getStatus() : 1);
+        
+        categoryMapper.insert(category);
+        return category.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean updateCategory(Long categoryId, CategoryRequest request) {
+        ProdCategory category = categoryMapper.selectById(categoryId);
+        if (category == null) {
+            throw new BusinessException("分类不存在");
+        }
+        
+        // 验证分类名称是否重复（排除自身）
+        LambdaQueryWrapper<ProdCategory> wrapper = new LambdaQueryWrapper<ProdCategory>()
+                .eq(ProdCategory::getName, request.getName().trim())
+                .ne(ProdCategory::getId, categoryId);
+        
+        if (category.getParentId() != null && category.getParentId() > 0) {
+            wrapper.eq(ProdCategory::getParentId, category.getParentId());
+        } else {
+            wrapper.and(w -> w.isNull(ProdCategory::getParentId).or().eq(ProdCategory::getParentId, 0));
+        }
+        
+        Long existCount = categoryMapper.selectCount(wrapper);
+        if (existCount > 0) {
+            throw new BusinessException("同级分类下已存在同名分类");
+        }
+        
+        category.setName(request.getName().trim());
+        if (request.getIcon() != null) {
+            category.setIcon(request.getIcon());
+        }
+        if (request.getSortOrder() != null) {
+            category.setSortOrder(request.getSortOrder());
+        }
+        if (request.getStatus() != null) {
+            category.setStatus(request.getStatus());
+        }
+        
+        return categoryMapper.updateById(category) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean deleteCategory(Long categoryId) {
+        ProdCategory category = categoryMapper.selectById(categoryId);
+        if (category == null) {
+            throw new BusinessException("分类不存在");
+        }
+        
+        // 检查是否有子分类
+        Long childCount = categoryMapper.selectCount(
+                new LambdaQueryWrapper<ProdCategory>()
+                        .eq(ProdCategory::getParentId, categoryId)
+        );
+        if (childCount > 0) {
+            throw new BusinessException("该分类下存在子分类，无法删除");
+        }
+        
+        // 检查是否有关联的商品
+        Long productCount = productMapper.selectCount(
+                new LambdaQueryWrapper<ProdProduct>()
+                        .eq(ProdProduct::getCategoryId, categoryId)
+        );
+        if (productCount > 0) {
+            throw new BusinessException("该分类下存在商品，无法删除");
+        }
+        
+        return categoryMapper.deleteById(categoryId) > 0;
+    }
+
+    private CategoryVO buildCategoryTree(ProdCategory category, List<ProdCategory> allCategories) {
+        CategoryVO vo = convertCategoryToVO(category);
+
+        List<CategoryVO> children = allCategories.stream()
+                .filter(c -> category.getId().equals(c.getParentId()))
+                .map(child -> buildCategoryTree(child, allCategories))
+                .collect(Collectors.toList());
+
+        vo.setChildren(children);
+        vo.setHasChildren(!children.isEmpty());
+
+        return vo;
+    }
+
+    private CategoryVO convertCategoryToVO(ProdCategory category) {
+        CategoryVO vo = BeanUtil.copyProperties(category, CategoryVO.class);
+        vo.setHasChildren(false);
+        // BeanUtil.copyProperties 会自动复制 status 字段，如果为 null 则设置默认值 1
+        if (vo.getStatus() == null) {
+            vo.setStatus(1);
+        }
+        return vo;
     }
 
     // ========== 转换方法 ==========

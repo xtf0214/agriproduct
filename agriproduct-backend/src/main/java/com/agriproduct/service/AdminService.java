@@ -1,6 +1,7 @@
 package com.agriproduct.service;
 
 import com.agriproduct.dto.BannerRequest;
+import com.agriproduct.dto.CategoryRequest;
 import com.agriproduct.dto.MerchantAuditRequest;
 import com.agriproduct.dto.ProductAuditRequest;
 import com.agriproduct.dto.UserStatusRequest;
@@ -9,6 +10,7 @@ import com.agriproduct.entity.ProdProduct;
 import com.agriproduct.entity.SysUser;
 import com.agriproduct.vo.AdminStatisticsOverviewVO;
 import com.agriproduct.vo.CategorySalesVO;
+import com.agriproduct.vo.CategoryVO;
 import com.agriproduct.vo.DailyOrderStatisticsVO;
 import com.agriproduct.vo.MerchantVO;
 import com.agriproduct.vo.ProductVO;
@@ -51,6 +53,38 @@ public interface AdminService {
     Boolean updateBanner(Long bannerId, BannerRequest request);
 
     Boolean deleteBanner(Long bannerId);
+
+    // ========== 分类管理 ==========
+
+    /**
+     * 获取分类列表（树形结构）
+     */
+    List<CategoryVO> getCategoryTree();
+
+    /**
+     * 获取一级分类列表
+     */
+    List<CategoryVO> getTopCategories();
+
+    /**
+     * 获取某个父分类下的子分类
+     */
+    List<CategoryVO> getChildrenCategories(Long parentId);
+
+    /**
+     * 创建分类（一级或二级）
+     */
+    Long createCategory(CategoryRequest request);
+
+    /**
+     * 更新分类
+     */
+    Boolean updateCategory(Long categoryId, CategoryRequest request);
+
+    /**
+     * 删除分类
+     */
+    Boolean deleteCategory(Long categoryId);
 
     // ========== 统计数据 ==========
 

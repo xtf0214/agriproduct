@@ -1526,6 +1526,224 @@ X-User-Id: {用户ID}
 
 ---
 
+### 8.5 分类管理
+
+#### 8.5.1 获取分类树形结构
+
+- **接口**: `GET /api/admin/category/tree`
+- **描述**: 获取完整的分类树形结构（包含一级和二级分类）
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": [
+    {
+      "id": 1,
+      "name": "水果",
+      "parentId": 0,
+      "icon": "https://xxx.com/icon1.png",
+      "sortOrder": 1,
+      "hasChildren": true,
+      "children": [
+        {
+          "id": 2,
+          "name": "苹果",
+          "parentId": 1,
+          "icon": null,
+          "sortOrder": 1,
+          "hasChildren": false,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+```
+
+#### 8.5.2 获取一级分类列表
+
+- **接口**: `GET /api/admin/category/top`
+- **描述**: 获取所有一级分类列表
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": [
+    {
+      "id": 1,
+      "name": "水果",
+      "parentId": 0,
+      "icon": "https://xxx.com/icon1.png",
+      "sortOrder": 1,
+      "hasChildren": true
+    },
+    {
+      "id": 3,
+      "name": "蔬菜",
+      "parentId": 0,
+      "icon": "https://xxx.com/icon2.png",
+      "sortOrder": 2,
+      "hasChildren": true
+    }
+  ]
+}
+```
+
+#### 8.5.3 获取子分类列表
+
+- **接口**: `GET /api/admin/category/children/{parentId}`
+- **描述**: 获取指定父分类下的子分类列表
+
+**路径参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| parentId | Long | 是 | 父分类ID |
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": [
+    {
+      "id": 2,
+      "name": "苹果",
+      "parentId": 1,
+      "icon": null,
+      "sortOrder": 1,
+      "hasChildren": false
+    },
+    {
+      "id": 4,
+      "name": "香蕉",
+      "parentId": 1,
+      "icon": null,
+      "sortOrder": 2,
+      "hasChildren": false
+    }
+  ]
+}
+```
+
+#### 8.5.4 新增分类
+
+- **接口**: `POST /api/admin/category`
+- **描述**: 新增一级分类或二级分类
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| name | String | 是 | 分类名称 |
+| parentId | Long | 否 | 父分类ID（为空或0表示一级分类） |
+| icon | String | 否 | 分类图标URL |
+| sortOrder | Integer | 否 | 排序号（数字越小越靠前，默认0） |
+| status | Integer | 否 | 状态：0-禁用，1-启用（默认1） |
+
+**请求示例 - 添加一级分类**:
+```json
+{
+  "name": "水果",
+  "icon": "https://xxx.com/icon1.png",
+  "sortOrder": 1,
+  "status": 1
+}
+```
+
+**请求示例 - 添加二级分类**:
+```json
+{
+  "name": "苹果",
+  "parentId": 1,
+  "sortOrder": 1
+}
+```
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": 10
+}
+```
+
+**错误情况**:
+- 父分类不存在
+- 同级分类下已存在同名分类
+- 不支持创建三级分类
+
+#### 8.5.5 更新分类
+
+- **接口**: `PUT /api/admin/category/{id}`
+- **描述**: 更新分类信息
+
+**路径参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | Long | 是 | 分类ID |
+
+**请求参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| name | String | 是 | 分类名称 |
+| icon | String | 否 | 分类图标URL |
+| sortOrder | Integer | 否 | 排序号 |
+| status | Integer | 否 | 状态：0-禁用，1-启用 |
+
+**请求示例**:
+```json
+{
+  "name": "新鲜水果",
+  "icon": "https://xxx.com/new-icon.png",
+  "sortOrder": 1,
+  "status": 1
+}
+```
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": true
+}
+```
+
+#### 8.5.6 删除分类
+
+- **接口**: `DELETE /api/admin/category/{id}`
+- **描述**: 删除分类
+
+**路径参数**:
+
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|------|
+| id | Long | 是 | 分类ID |
+
+**响应示例**:
+```json
+{
+  "code": 200,
+  "message": "操作成功",
+  "data": true
+}
+```
+
+**错误情况**:
+- 分类不存在
+- 该分类下存在子分类，无法删除
+- 该分类下存在商品，无法删除
+
+---
+
 ## 错误码说明
 
 | 错误码 | 说明 |

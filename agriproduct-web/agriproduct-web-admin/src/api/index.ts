@@ -5,3 +5,13 @@ export { getMerchantListApi, auditMerchantApi } from './merchant'
 export { getAuditProductListApi, auditProductApi } from './product'
 export { getBannerListApi, addBannerApi, updateBannerApi, deleteBannerApi } from './banner'
 export { getStatisticsOverviewApi, getDailyOrderStatisticsApi, getCategorySalesApi } from './statistics'
+export {
+  getCategoryTreeApi,
+  getTopCategoriesApi,
+  getChildrenCategoriesApi,
+  addCategoryApi,
+  updateCategoryApi,
+  deleteCategoryApi,
+  uploadCategoryIconApi
+} from './category'
+export type { CategoryItem, CategoryForm } from './category'

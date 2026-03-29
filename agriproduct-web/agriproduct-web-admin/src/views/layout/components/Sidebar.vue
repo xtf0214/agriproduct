@@ -37,6 +37,7 @@
             <span>商品管理</span>
           </template>
           <el-menu-item index="/product-audit">商品审核</el-menu-item>
+          <el-menu-item index="/category">分类管理</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="/system">
