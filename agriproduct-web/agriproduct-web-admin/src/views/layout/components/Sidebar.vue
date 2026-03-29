@@ -40,6 +40,14 @@
           <el-menu-item index="/category">分类管理</el-menu-item>
         </el-sub-menu>
 
+        <el-sub-menu index="/order">
+          <template #title>
+            <el-icon><List /></el-icon>
+            <span>订单管理</span>
+          </template>
+          <el-menu-item index="/order">订单列表</el-menu-item>
+        </el-sub-menu>
+
         <el-sub-menu index="/system">
           <template #title>
             <el-icon><Setting /></el-icon>

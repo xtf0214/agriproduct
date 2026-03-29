@@ -14,4 +14,6 @@ export {
   deleteCategoryApi,
   uploadCategoryIconApi
 } from './category'
+export { getOrderListApi, getOrderDetailApi, shipOrderApi, cancelOrderApi } from './order'
 export type { CategoryItem, CategoryForm } from './category'
+export type { OrderItem, OrderItemDetail, OrderListParams } from './order'

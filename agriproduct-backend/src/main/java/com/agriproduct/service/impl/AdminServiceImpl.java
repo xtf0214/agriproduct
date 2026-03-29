@@ -422,6 +422,122 @@ public class AdminServiceImpl implements AdminService {
         return BeanUtil.copyProperties(banner, BannerVO.class);
     }
 
+    // ========== 订单管理 ==========
+
+    @Override
+    public IPage<OrderVO> getOrderList(Page<OrderOrder> page, String orderNo, Integer status, Long userId, Long merchantId) {
+        LambdaQueryWrapper<OrderOrder> wrapper = new LambdaQueryWrapper<>();
+
+        if (orderNo != null && !orderNo.trim().isEmpty()) {
+            wrapper.like(OrderOrder::getOrderNo, orderNo.trim());
+        }
+        if (status != null) {
+            wrapper.eq(OrderOrder::getStatus, status);
+        }
+        if (userId != null) {
+            wrapper.eq(OrderOrder::getUserId, userId);
+        }
+        if (merchantId != null) {
+            wrapper.eq(OrderOrder::getMerchantId, merchantId);
+        }
+
+        wrapper.orderByDesc(OrderOrder::getCreateTime);
+
+        IPage<OrderOrder> orderPage = orderMapper.selectPage(page, wrapper);
+
+        Page<OrderVO> result = new Page<>(orderPage.getCurrent(), orderPage.getSize(), orderPage.getTotal());
+        result.setRecords(orderPage.getRecords().stream()
+                .map(this::convertOrderToVO)
+                .collect(Collectors.toList()));
+        return result;
+    }
+
+    @Override
+    public OrderVO getOrderDetail(Long orderId) {
+        OrderOrder order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new BusinessException("订单不存在");
+        }
+        return convertOrderToVO(order);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean shipOrder(Long orderId) {
+        OrderOrder order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new BusinessException("订单不存在");
+        }
+        if (order.getStatus() != 2) {
+            throw new BusinessException("只有待发货状态的订单才能发货");
+        }
+        order.setStatus(3);
+        order.setShipTime(LocalDateTime.now());
+        return orderMapper.updateById(order) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean cancelOrder(Long orderId) {
+        OrderOrder order = orderMapper.selectById(orderId);
+        if (order == null) {
+            throw new BusinessException("订单不存在");
+        }
+        if (order.getStatus() == 4 || order.getStatus() == 5) {
+            throw new BusinessException("已完成或已取消的订单不能取消");
+        }
+        if (order.getStatus() == 3) {
+            throw new BusinessException("已发货的订单不能取消");
+        }
+        order.setStatus(5);
+        return orderMapper.updateById(order) > 0;
+    }
+
+    private OrderVO convertOrderToVO(OrderOrder order) {
+        OrderVO vo = OrderVO.builder()
+                .id(order.getId())
+                .orderNo(order.getOrderNo())
+                .userId(order.getUserId())
+                .merchantId(order.getMerchantId())
+                .totalAmount(order.getTotalAmount())
+                .payAmount(order.getPayAmount())
+                .status(order.getStatus())
+                .statusDesc(OrderVO.getStatusDesc(order.getStatus()))
+                .payStatus(order.getPayStatus())
+                .payTime(order.getPayTime())
+                .shipTime(order.getShipTime())
+                .finishTime(order.getFinishTime())
+                .receiverName(order.getReceiverName())
+                .receiverPhone(order.getReceiverPhone())
+                .receiverAddress(order.getReceiverAddress())
+                .remark(order.getRemark())
+                .createTime(order.getCreateTime())
+                .build();
+
+        // 获取订单项列表
+        List<OrderItem> items = orderItemMapper.selectList(
+                new LambdaQueryWrapper<OrderItem>()
+                        .eq(OrderItem::getOrderId, order.getId()));
+        
+        List<OrderItemVO> itemVOs = items.stream()
+                .map(this::convertOrderItemToVO)
+                .collect(Collectors.toList());
+        vo.setItems(itemVOs);
+
+        return vo;
+    }
+
+    private OrderItemVO convertOrderItemToVO(OrderItem item) {
+        OrderItemVO vo = BeanUtil.copyProperties(item, OrderItemVO.class);
+        // 获取商品信息
+        ProdProduct product = productMapper.selectById(item.getProductId());
+        if (product != null) {
+            vo.setProductName(product.getName());
+            vo.setProductImage(product.getMainImage());
+        }
+        return vo;
+    }
+
     // ========== 统计数据 ==========
 
     @Override

@@ -8,6 +8,7 @@ import com.agriproduct.dto.ProductAuditRequest;
 import com.agriproduct.dto.UserStatusRequest;
 import com.agriproduct.entity.ContentBanner;
 import com.agriproduct.entity.Merchant;
+import com.agriproduct.entity.OrderOrder;
 import com.agriproduct.entity.ProdProduct;
 import com.agriproduct.entity.SysUser;
 import com.agriproduct.service.AdminService;
@@ -18,6 +19,7 @@ import com.agriproduct.vo.CategorySalesVO;
 import com.agriproduct.vo.CategoryVO;
 import com.agriproduct.vo.DailyOrderStatisticsVO;
 import com.agriproduct.vo.MerchantVO;
+import com.agriproduct.vo.OrderVO;
 import com.agriproduct.vo.ProductVO;
 import com.agriproduct.vo.UserInfoVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -194,6 +196,43 @@ public class AdminController {
     public Result<Map<String, String>> uploadCategoryIcon(@RequestParam("file") MultipartFile file) {
         String url = fileStorageService.upload(file, "category/icon");
         return Result.success(Map.of("url", url));
+    }
+
+    // ========== 订单管理 ==========
+
+    @Operation(summary = "获取订单列表")
+    @GetMapping("/order/list")
+    public Result<IPage<OrderVO>> getOrderList(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String orderNo,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) Long merchantId) {
+        Page<OrderOrder> page = new Page<>(pageNum, pageSize);
+        IPage<OrderVO> result = adminService.getOrderList(page, orderNo, status, userId, merchantId);
+        return Result.success(result);
+    }
+
+    @Operation(summary = "获取订单详情")
+    @GetMapping("/order/{id}")
+    public Result<OrderVO> getOrderDetail(@PathVariable Long id) {
+        OrderVO order = adminService.getOrderDetail(id);
+        return Result.success(order);
+    }
+
+    @Operation(summary = "发货")
+    @PutMapping("/order/{id}/ship")
+    public Result<Boolean> shipOrder(@PathVariable Long id) {
+        Boolean result = adminService.shipOrder(id);
+        return Result.success(result);
+    }
+
+    @Operation(summary = "取消订单")
+    @PutMapping("/order/{id}/cancel")
+    public Result<Boolean> cancelOrder(@PathVariable Long id) {
+        Boolean result = adminService.cancelOrder(id);
+        return Result.success(result);
     }
 
     // ========== 统计数据 ==========

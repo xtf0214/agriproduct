@@ -6,6 +6,7 @@ import com.agriproduct.dto.MerchantAuditRequest;
 import com.agriproduct.dto.ProductAuditRequest;
 import com.agriproduct.dto.UserStatusRequest;
 import com.agriproduct.entity.Merchant;
+import com.agriproduct.entity.OrderOrder;
 import com.agriproduct.entity.ProdProduct;
 import com.agriproduct.entity.SysUser;
 import com.agriproduct.vo.AdminStatisticsOverviewVO;
@@ -13,6 +14,7 @@ import com.agriproduct.vo.CategorySalesVO;
 import com.agriproduct.vo.CategoryVO;
 import com.agriproduct.vo.DailyOrderStatisticsVO;
 import com.agriproduct.vo.MerchantVO;
+import com.agriproduct.vo.OrderVO;
 import com.agriproduct.vo.ProductVO;
 import com.agriproduct.vo.UserInfoVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -85,6 +87,40 @@ public interface AdminService {
      * 删除分类
      */
     Boolean deleteCategory(Long categoryId);
+
+    // ========== 订单管理 ==========
+
+    /**
+     * 获取订单列表（分页）
+     * @param page 分页参数
+     * @param orderNo 订单号（可选）
+     * @param status 订单状态（可选）
+     * @param userId 用户ID（可选）
+     * @param merchantId 商家ID（可选）
+     * @return 订单列表
+     */
+    IPage<OrderVO> getOrderList(Page<OrderOrder> page, String orderNo, Integer status, Long userId, Long merchantId);
+
+    /**
+     * 获取订单详情
+     * @param orderId 订单ID
+     * @return 订单详情
+     */
+    OrderVO getOrderDetail(Long orderId);
+
+    /**
+     * 发货
+     * @param orderId 订单ID
+     * @return 是否成功
+     */
+    Boolean shipOrder(Long orderId);
+
+    /**
+     * 取消订单
+     * @param orderId 订单ID
+     * @return 是否成功
+     */
+    Boolean cancelOrder(Long orderId);
 
     // ========== 统计数据 ==========
 
